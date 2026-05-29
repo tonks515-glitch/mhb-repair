@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>妙慧樓 水電報修</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+// ═══════════════════════════════════════════════════════════════
+// XB — Pure JS XLSX Builder (bypasses SheetJS style limitations)
+// ═══════════════════════════════════════════════════════════════
+(function(){
+const _CT=new Uint32Array(256);for(let n=0;n<256;n++){let v=n;for(let k=0;k<8;k++)v=(v&1)?(0xEDB88320^(v>>>1)):(v>>>1);_CT[n]=v;}
+function _crc(d){let c=0xFFFFFFFF;for(let i=0;i<d.length;i++)c=_CT[(c^d[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+function _u32(n){const b=new Uint8Array(4);new DataView(b.buffer).setUint32(0,n,true);return b;}
+function _u16(n){const b=new Uint8Array(2);new DataView(b.buffer).setUint16(0,n,true);return b;}
+function _cat(a){const t=a.reduce((s,x)=>s+x.length,0),o=new Uint8Array(t);let p=0;for(const x of a){o.set(x,p);p+=x.length;}return o;}
+function _enc(s){return new TextEncoder().encode(s);}
+function _zip(files){
+  const es=[];let off=0;
+  for(const[nm,data]of files){
+    const nb=_enc(nm),db=typeof data==='string'?_enc(data):data,crc=_crc(db);
+    const loc=_cat([new Uint8Array([0x50,0x4B,0x03,0x04,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),_u32(crc),_u32(db.length),_u32(db.length),_u16(nb.length),_u16(0),nb,db]);
+    es.push({nb,crc,sz:db.length,off,loc});off+=loc.length;
+  }
+  const cds=[];let cdsz=0;
+  for(const e of es){
+    const cd=_cat([new Uint8Array([0x50,0x4B,0x01,0x02,0x14,0x00,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),_u32(e.crc),_u32(e.sz),_u32(e.sz),_u16(e.nb.length),_u16(0),_u16(0),_u16(0),_u16(0),_u32(0),_u32(e.off),e.nb]);
+    cds.push(cd);cdsz+=cd.length;
+  }
+  const eocd=_cat([new Uint8Array([0x50,0x4B,0x05,0x06,0x00,0x00,0x00,0x00]),_u16(es.length),_u16(es.length),_u32(cdsz),_u32(off),_u16(0)]);
+  return _cat([...es.map(e=>e.loc),...cds,eocd]);
+}
+const _ST='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="4"><font><sz val="13"/><name val="Calibri"/></font><font><sz val="13"/><b/><name val="Calibri"/></font><font><sz val="13"/><b/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><sz val="14"/><b/><color rgb="FF1A4A78"/><name val="Calibri"/></font></fonts><fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1A4A78"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEAF0F9"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFFFFF"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF2F6FC"/></patternFill></fill></fills><borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FF999999"/></left><right style="thin"><color rgb="FF999999"/></right><top style="thin"><color rgb="FF999999"/></top><bottom style="thin"><color rgb="FF999999"/></bottom><diagonal/></border><border><left style="medium"><color rgb="FF1A4A78"/></left><right style="medium"><color rgb="FF1A4A78"/></right><top style="medium"><color rgb="FF1A4A78"/></top><bottom style="medium"><color rgb="FF1A4A78"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="9"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="2" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="2" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+function _col(c){let s='';c++;while(c>0){s=String.fromCharCode(65+(c-1)%26)+s;c=Math.floor((c-1)/26);}return s;}
+function _esc(s){return String(s===null||s===undefined?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _ws(rows,cols,merges){
+  let x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols>';
+  cols.forEach((w,i)=>{x+='<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>';});
+  x+='</cols><sheetData>';
+  rows.forEach((row,ri)=>{
+    x+='<row r="'+(ri+1)+'" ht="'+(row.ht||39)+'" customHeight="1">';
+    row.cells.forEach((cell,ci)=>{
+      if(cell.skip)return;
+      const addr=_col(ci)+(ri+1);
+      const v=cell.v;
+      const isNum=typeof v==='number';
+      x+='<c r="'+addr+'" s="'+(cell.s||0)+'"'+(isNum?'':' t="str"')+'>'+( (v===null||v===undefined||v==='')? '' : '<v>'+_esc(v)+'</v>' )+'</c>';
+    });
+    x+='</row>';
+  });
+  x+='</sheetData>';
+  if(merges&&merges.length){x+='<mergeCells count="'+merges.length+'">';merges.forEach(m=>{x+='<mergeCell ref="'+_col(m.c1)+(m.r1+1)+':'+_col(m.c2)+(m.r2+1)+'"/>';});x+='</mergeCells>';}
+  x+='</worksheet>';return x;
+}
+// Multi-sheet download: sheets = [{name, rows, cols, merges}, ...]
+function _dlSheets(fn, sheets){
+  const CT_parts=sheets.map((s,i)=>'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('');
+  const CT='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+CT_parts+'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+  const RR='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  const WB_sheets=sheets.map((s,i)=>'<sheet name="'+_esc(s.name)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>').join('');
+  const WB='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+WB_sheets+'</sheets></workbook>';
+  const WR_rels=sheets.map((s,i)=>'<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join('');
+  const WR='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+WR_rels+'<Relationship Id="rId'+(sheets.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+  const files=[['[Content_Types].xml',CT],['_rels/.rels',RR],['xl/workbook.xml',WB],['xl/_rels/workbook.xml.rels',WR]];
+  sheets.forEach((s,i)=>files.push(['xl/worksheets/sheet'+(i+1)+'.xml',_ws(s.rows,s.cols,s.merges)]));
+  files.push(['xl/styles.xml',_ST]);
+  const zip=_zip(files);
+  const blob=new Blob([zip],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function _dl(fn,sn,rows,cols,merges){_dlSheets(fn,[{name:sn,rows,cols,merges}]);}
+// Style helpers: ds(rowIndex, 'center'|'left') -> style index for data rows
+window.XB={dl:_dl,dl2:_dlSheets,S:{TI:1,HC:2,HL:3,DC:4,DL:5,AC:6,AL:7,HN:8},ds:function(ri,al){const a=ri%2!==0;return a?(al==='left'?7:6):(al==='left'?5:4);}};
+})();
+
+</script>
+<style>
+:root{
+  --bg:#f0eeeb;--card:#fff;--pri:#1a4a78;--pri-dk:#112f50;--pri-lt:#e6eef8;--pri-md:#3d7abf;
+  --acc:#c96b0a;--acc-lt:#fef3e7;--grn:#246b42;--grn-lt:#e8f5ee;
+  --pur:#5e3899;--pur-lt:#f0ebff;--red:#b83030;--red-lt:#fceaea;
+  --amber:#b87800;--amber-lt:#fff8e8;--sky:#0077a8;--sky-lt:#e0f4ff;
+  --bdr:#dedad4;--bdr-md:#c8c4bc;--t1:#181816;--t2:#52504c;--t3:#96938e;
+  --r:12px;--rs:8px;--rss:5px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--t1);font-size:15px;padding-bottom:80px;}
+
+/* HEADER */
+.hdr{background:var(--pri);padding:0 16px;position:sticky;top:0;z-index:300;box-shadow:0 2px 12px rgba(0,0,0,.18);}
+.hdr-inner{display:flex;align-items:center;justify-content:space-between;height:52px;}
+.hdr-title{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
+.hdr-sub{color:rgba(255,255,255,.6);font-size:11px;margin-top:1px;}
+.hdr-pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;white-space:nowrap;}
+.hdr-pill.urgent{background:var(--acc);border-color:var(--acc);}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--bdr);display:flex;z-index:300;padding-bottom:env(safe-area-inset-bottom,0);box-shadow:0 -2px 12px rgba(0,0,0,.06);}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 6px;cursor:pointer;color:var(--t3);font-size:10px;font-weight:600;letter-spacing:.3px;gap:3px;border-top:2px solid transparent;transition:all .15s;}
+.nb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.nb.on{color:var(--pri);border-top-color:var(--pri);}
+
+/* PAGE */
+.page{display:none;padding:14px 14px 20px;}
+.page.on{display:block;}
+
+/* CARD */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--bdr);margin-bottom:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);}
+.card-hd{padding:11px 14px 10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
+.card-hl{display:flex;align-items:center;gap:8px;}
+.ci-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.ci-icon.blue{background:var(--pri-lt);} .ci-icon.green{background:var(--grn-lt);} .ci-icon.amber{background:var(--amber-lt);}
+.card-ttl{font-size:13px;font-weight:700;color:var(--t1);}
+.card-sub{font-size:11px;color:var(--t3);margin-top:1px;}
+.card-body{padding:13px 14px;}
+
+/* FORM */
+.f{margin-bottom:10px;}
+.f:last-child{margin-bottom:0;}
+label{display:block;font-size:11px;font-weight:700;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.req{color:var(--red);}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  width:100%;padding:10px 12px;border:1.5px solid var(--bdr-md);border-radius:var(--rs);
+  font-size:16px;font-family:inherit;background:#fff;color:var(--t1);
+  -webkit-appearance:none;appearance:none;outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--pri-md);box-shadow:0 0 0 3px rgba(61,122,191,.14);}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2396938e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:32px;}
+textarea{resize:vertical;min-height:64px;line-height:1.55;}
+.row2{display:flex;gap:9px;}
+.row2 .f{flex:1;margin-bottom:0;}
+.field-hint{font-size:11px;color:var(--t3);margin-top:4px;}
+
+/* ITEM GRID */
+.igrid-wrap{border:1.5px solid var(--bdr-md);border-radius:var(--rs);overflow:hidden;background:#fafaf8;}
+.igrid-search{padding:8px;border-bottom:1px solid var(--bdr);}
+.igrid-search input{border-color:var(--bdr);background:#fff;font-size:13px;padding:7px 10px;}
+.igrid-scroll{max-height:210px;overflow-y:auto;padding:6px;-webkit-overflow-scrolling:touch;}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;}
+.ic{padding:9px 10px;border-radius:var(--rss);font-size:14px;cursor:pointer;color:var(--t2);transition:all .12s;user-select:none;border:1px solid transparent;min-height:44px;display:flex;align-items:center;}
+.ic:hover{background:var(--pri-lt);color:var(--pri);}
+.ic.on{background:var(--pri);color:#fff;font-weight:600;}
+.manual-add{display:flex;gap:7px;margin-top:8px;}
+.manual-add input{flex:1;font-size:16px;padding:10px 12px;}
+.manual-add button{padding:8px 13px;background:var(--pri-lt);color:var(--pri);border:1.5px solid var(--pri-md);border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+
+/* CONTENT AREA */
+.content-card.hidden{display:none;}
+.ci{border-bottom:1px solid var(--bdr);padding:13px 14px;}
+.ci:last-child{border-bottom:none;}
+.ci-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ci-badge{background:var(--pri);color:#fff;border-radius:var(--rss);padding:3px 10px;font-size:13px;font-weight:700;}
+.ci-remove{color:var(--t3);font-size:20px;cursor:pointer;padding:2px 6px;border-radius:4px;}
+.ci-remove:hover{color:var(--red);background:var(--red-lt);}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
+.chip{padding:8px 13px;border-radius:20px;font-size:13px;border:1.5px solid var(--bdr);background:#fff;cursor:pointer;transition:all .12s;color:var(--t2);user-select:none;line-height:1.3;min-height:40px;display:inline-flex;align-items:center;}
+.chip:hover{border-color:var(--pri-md);color:var(--pri);}
+.chip.on{background:var(--pri-lt);border-color:var(--pri);color:var(--pri);font-weight:600;}
+.ci-fields{display:flex;gap:7px;margin-top:8px;}
+.ci-fields input{font-size:13px;padding:7px 10px;}
+.ci-fields .qty{width:100px;flex:none;}
+.ci-fields .loc{flex:1;}
+.ci-custom{margin-top:7px;}
+.ci-custom input{font-size:13px;padding:7px 10px;}
+
+/* SUBMIT BAR — sticky above nav */
+.submit-bar{position:sticky;bottom:72px;left:0;right:0;background:linear-gradient(to top,var(--bg) 75%,transparent);padding:14px 14px 8px;margin:0 -14px;z-index:50;}
+
+/* RECORD LIST */
+.srch{position:sticky;top:0;background:var(--bg);padding:8px 0 6px;z-index:10;}
+.srch-row{display:flex;gap:7px;}
+.srch-row input{flex:1;font-size:14px;}
+.srch-row select{width:auto;min-width:88px;flex-shrink:0;font-size:13px;}
+.sort-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.sort-btn{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--bdr-md);background:#fff;cursor:pointer;color:var(--t2);transition:all .12s;white-space:nowrap;min-height:36px;}
+.sort-btn.on{background:var(--pri-lt);border-color:var(--pri);color:var(--pri);}
+.list-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;margin-top:4px;}
+.list-ttl{font-size:14px;font-weight:700;}
+.count-pill{background:var(--pri);color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;}
+.floor-group{margin-bottom:4px;}
+.floor-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);padding:6px 2px 4px;}
+
+.rec{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.rec-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 13px 9px;border-bottom:1px solid var(--bdr);gap:8px;}
+.rec-loc{font-weight:700;font-size:15px;color:var(--pri);}
+.rec-loc small{font-weight:400;font-size:12px;color:var(--t3);margin-left:4px;}
+.rec-rdate{font-size:11px;color:var(--t3);margin-top:2px;}
+.rec-entries{padding:0 13px;}
+.re{padding:9px 0;border-bottom:1px solid var(--bdr);}
+.re:last-child{border-bottom:none;}
+.re-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:4px;}
+.re-item{font-weight:700;font-size:14px;color:var(--t1);}
+.re-content{font-size:13px;color:var(--t2);line-height:1.45;}
+.re-fix{font-size:13px;color:var(--grn);margin-top:3px;line-height:1.45;}
+.re-mats{font-size:12px;color:var(--acc);margin-top:3px;line-height:1.5;}
+.rec-acts{padding:9px 13px;display:flex;gap:7px;background:#fafaf8;border-top:1px solid var(--bdr);}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.b-p{background:#fff4e0;color:#8a5000;}
+.b-d{background:var(--grn-lt);color:var(--grn);}
+.b-df{background:var(--pur-lt);color:var(--pur);}
+.b-prog{background:var(--sky-lt);color:var(--sky);}
+
+/* BUTTONS */
+.btn{display:block;width:100%;padding:12px;border:none;border-radius:var(--rs);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s;text-align:center;letter-spacing:.2px;}
+.btn:active{transform:scale(.98);}
+.btn-p{background:var(--pri);color:#fff;box-shadow:0 4px 14px rgba(26,74,120,.3);}
+.btn-p:active{background:var(--pri-dk);}
+.btn-g{background:var(--grn);color:#fff;}
+.btn-a{background:var(--acc);color:#fff;}
+.btn-o{background:transparent;color:var(--pri);border:1.5px solid var(--pri);}
+.btn-ghost{background:transparent;color:var(--t2);border:1.5px solid var(--bdr-md);}
+.btn-sm{padding:7px 13px;font-size:13px;width:auto;display:inline-block;}
+.btn-xs{padding:5px 10px;font-size:12px;width:auto;display:inline-block;border-radius:var(--rss);}
+.btn-row{display:flex;gap:8px;margin-bottom:10px;}
+.btn-row .btn{flex:1;}
+
+/* STATUS MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;align-items:flex-end;}
+.overlay.open{display:flex;}
+.sheet{background:#fff;border-radius:18px 18px 0 0;width:100%;max-height:95vh;overflow-y:auto;padding:6px 0 44px;}
+.sh-handle{width:36px;height:4px;background:var(--bdr-md);border-radius:2px;margin:10px auto 0;}
+.sh-hd{padding:14px 16px 12px;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.sh-title{font-size:17px;font-weight:700;color:var(--t1);}
+.sh-loc{font-size:13px;color:var(--t3);margin-top:3px;}
+.sh-close{color:var(--t3);font-size:24px;cursor:pointer;line-height:1;padding:2px;}
+.sh-close:hover{color:var(--t1);}
+.fx-date-bar{padding:12px 16px;background:var(--pri-lt);border-bottom:1px solid #d0e0f5;display:flex;align-items:center;gap:10px;}
+.fx-date-bar label{font-size:12px;font-weight:700;color:var(--pri);flex-shrink:0;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.fx-date-bar input{font-size:16px;padding:9px 11px;border-color:#b0c8e8;width:110px;flex:none;}
+.fx-entries{padding:0 16px;}
+.fxe{border-bottom:1px solid var(--bdr);padding:14px 0;}
+.fxe:last-child{border-bottom:none;}
+.fxe-ttl{font-size:15px;font-weight:700;color:var(--pri);margin-bottom:2px;}
+.fxe-content{font-size:13px;color:var(--t2);margin-bottom:12px;}
+.status-row{display:flex;gap:8px;margin-bottom:12px;}
+.st-btn{flex:1;text-align:center;padding:9px 6px;border-radius:var(--rs);border:1.5px solid var(--bdr-md);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--t2);line-height:1.3;}
+.st-btn.sd{border-color:var(--grn);background:var(--grn-lt);color:var(--grn);}
+.st-btn.sdf{border-color:var(--pur);background:var(--pur-lt);color:var(--pur);}
+.st-btn.spg{border-color:var(--sky);background:var(--sky-lt);color:var(--sky);}
+.compose-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px;}
+.compose-grid select,.compose-grid input{font-size:16px;padding:10px 12px;}
+.fx-sel{font-size:16px;padding:8px 10px;margin-bottom:7px;width:100%;border:1.5px solid var(--bdr-md);border-radius:var(--rs);-webkit-appearance:none;appearance:none;font-family:inherit;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2396938e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center;padding-right:30px;color:var(--t1);outline:none;}
+.fx-sel:focus{border-color:var(--pri-md);box-shadow:0 0 0 3px rgba(61,122,191,.14);}
+.fx-inp{font-size:16px;padding:8px 10px;margin-bottom:7px;width:100%;border:1.5px solid var(--bdr-md);border-radius:var(--rs);font-family:inherit;color:var(--t1);background:#fff;outline:none;}
+.fx-inp:focus{border-color:var(--pri-md);box-shadow:0 0 0 3px rgba(61,122,191,.14);}
+
+/* MAT */
+.mat-section{margin-top:10px;}
+.mat-section>label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:7px;}
+.mat-list{border:1px solid var(--bdr);border-radius:var(--rs);overflow:hidden;margin-bottom:8px;}
+.mat-row{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--bdr);background:#fff;}
+.mat-row:last-child{border-bottom:none;}
+.mat-info{flex:1;min-width:0;}
+.mat-name{font-size:13px;font-weight:600;color:var(--t1);}
+.mat-src-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:2px;}
+.mss{background:var(--pri-lt);color:var(--pri);}
+.msv{background:var(--amber-lt);color:var(--amber);}
+.msr{background:var(--pur-lt);color:var(--pur);}
+.mat-qty-inp,.mat-fee-inp{padding:8px 7px;border:1.5px solid var(--bdr-md);border-radius:var(--rss);font-size:16px;font-family:inherit;text-align:center;outline:none;min-height:44px;}
+.mat-qty-inp{width:56px;}
+.mat-fee-inp{width:72px;}
+.mat-lbl{font-size:11px;color:var(--t3);margin-bottom:2px;text-align:right;}
+.mat-del{color:var(--t3);font-size:20px;cursor:pointer;flex-shrink:0;padding:2px 4px;border-radius:4px;}
+.mat-del:hover{color:var(--red);background:var(--red-lt);}
+.mat-add-row{display:flex;gap:7px;}
+.mat-add-row select{flex:1;font-size:16px;padding:10px 12px;}
+.mat-empty{padding:10px 12px;font-size:13px;color:var(--t3);font-style:italic;}
+
+/* PRE-MAT (耗材先行) */
+.premat-section{background:var(--amber-lt);border:1px solid #f0d080;border-radius:var(--rs);padding:12px 14px;margin-bottom:10px;}
+.premat-title{font-size:13px;font-weight:700;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.premat-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(184,120,0,.15);}
+.premat-row:last-child{border-bottom:none;}
+.premat-name{flex:1;font-size:13px;}
+.premat-qty{width:64px;padding:8px 7px;border:1.5px solid #deb84a;border-radius:var(--rss);font-size:16px;text-align:center;background:#fff;min-height:44px;}
+.premat-del{color:var(--amber);font-size:18px;cursor:pointer;padding:2px;}
+
+/* CONSUMABLE PAGE */
+.ctable-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.ctable{width:100%;border-collapse:collapse;font-size:13px;min-width:320px;}
+.ctable th{background:var(--bg);padding:8px 11px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--t3);border-bottom:1px solid var(--bdr);white-space:nowrap;}
+.ctable td{padding:9px 11px;border-bottom:1px solid var(--bdr);vertical-align:middle;}
+.ctable tr:last-child td{border-bottom:none;}
+.ctable input{padding:5px 8px;font-size:13px;border:1.5px solid var(--bdr-md);border-radius:var(--rss);}
+.ctable input[type=number]{width:64px;text-align:center;font-size:16px;}
+.ctable input[type=text]{width:100%;font-size:16px;}
+
+/* MISC */
+.notice{border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-bottom:10px;line-height:1.55;display:flex;gap:9px;align-items:flex-start;}
+.notice-icon{font-size:16px;flex-shrink:0;margin-top:-1px;}
+.n-blue{background:var(--pri-lt);border:1px solid #c0d8f5;color:#1a3a60;}
+.n-green{background:var(--grn-lt);border:1px solid #a8d8be;color:#1a4a2e;}
+.n-amber{background:var(--amber-lt);border:1px solid #f0d080;color:#7a5000;}
+.empty{text-align:center;padding:44px 20px;color:var(--t3);font-size:14px;}
+hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
+.rp-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);}
+.rp-item:last-child{border-bottom:none;}
+.rp-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--pri);flex-shrink:0;margin-top:1px;cursor:pointer;}
+.rp-info{flex:1;cursor:pointer;}
+#toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,20,18,.92);color:#fff;padding:10px 22px;border-radius:30px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:all .2s;white-space:nowrap;max-width:90vw;text-align:center;pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media (max-width:380px){
+  .row2{flex-direction:column;gap:0;}
+  .row2 .f{margin-bottom:10px;}
+  .compose-grid{grid-template-columns:1fr;}
+  .status-row{flex-wrap:wrap;}
+  .st-btn{flex:none;width:calc(50% - 4px);}
+  .hdr-title{font-size:15px;}
+  .rec-loc{font-size:14px;}
+  .igrid{grid-template-columns:1fr 1fr;}
+  .btn-sm{font-size:12px;padding:8px 10px;}
+  .fx-date-bar{flex-wrap:wrap;gap:6px;}
+}
+@media (max-width:480px){
+  .page{padding:10px 12px 20px;}
+  .card-body{padding:11px 12px;}
+  .fx-entries{padding:0 12px;}
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div><div class="hdr-title">妙慧樓 水電報修</div><div class="hdr-sub">維修管理系統</div></div>
+    <div class="hdr-pill urgent" id="pending-badge">0 待維修</div>
+  </div>
+</header>
+
+<!-- ══ PAGE 1 登記報修 ══ -->
+<div class="page on" id="pg-add">
+  <div class="notice n-green" style="margin-top:2px;">
+    <span class="notice-icon">💡</span>
+    <div><b>操作流程：</b>①填位置與報修日期 → ②選報修項目 → ③填故障描述 → ④點「儲存報修」→ ⑤到「紀錄」頁 → 點「更新維修狀況」填入維修結果</div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><div class="card-hl"><div class="ci-icon blue">📍</div><div><div class="card-ttl">位置資訊</div></div></div></div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="f"><label>區域 <span class="req">*</span></label>
+          <select id="a-zone"><option value="">選擇</option><option>有人住</option><option>空寮</option><option>公區</option></select>
+        </div>
+        <div class="f"><label>樓層 <span class="req">*</span></label>
+          <select id="a-floor"><option value="">選擇</option><option value="B1">B1</option><option value="一">一樓</option><option value="二">二樓</option><option value="三">三樓</option><option value="四">四樓</option><option value="五">五樓</option><option value="六">六樓</option><option value="頂樓">頂樓</option></select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="f"><label>位置 / 房號 <span class="req">*</span></label>
+          <input type="text" id="a-room" placeholder="例：501、大交陽台" autocomplete="off"/>
+        </div>
+        <div class="f">
+          <label>報修日期 <span class="req">*</span></label>
+          <input type="date" id="a-rdate"/>
+          <div class="field-hint">住戶回報壞掉的日期</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><div class="card-hl"><div class="ci-icon blue">🔧</div><div><div class="card-ttl">報修項目</div><div class="card-sub">點選後於下方填故障描述</div></div></div></div>
+    <div class="card-body">
+      <div class="igrid-wrap">
+        <div class="igrid-search"><input type="text" placeholder="🔍 搜尋項目…" id="item-search" oninput="filterItems(this.value)" autocomplete="off"/></div>
+        <div class="igrid-scroll"><div class="igrid" id="item-grid"></div></div>
+      </div>
+      <div class="manual-add" style="margin-top:8px;">
+        <input type="text" id="a-manual" placeholder="其他項目（Enter 新增）"/>
+        <button onclick="addManual()">＋ 新增</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card content-card hidden" id="content-card">
+    <div class="card-hd"><div class="card-hl"><div class="ci-icon green">📝</div><div><div class="card-ttl">報修內容</div><div class="card-sub">每個項目各自填描述、數量、位置</div></div></div></div>
+    <div id="content-area"></div>
+  </div>
+
+  <!-- 耗材先行：在儲存報修前就可以填入預計耗材 -->
+  <div class="card content-card hidden" id="premat-card">
+    <div class="card-hd"><div class="card-hl"><div class="ci-icon amber">📦</div><div><div class="card-ttl">預計耗材（選填）</div><div class="card-sub">維修前先填，供廠商採購參考</div></div></div></div>
+    <div class="card-body">
+      <div class="premat-section" id="premat-area">
+        <div class="premat-title">📋 預計需要的耗材</div>
+        <div id="premat-list"></div>
+        <div style="display:flex;gap:7px;margin-top:8px;">
+          <select id="premat-sel" style="flex:1;font-size:13px;padding:8px 10px;">
+            <option value="">── 選擇耗材 ──</option>
+            <optgroup label="妙慧樓自備">
+              <option value="和成HCG馬桶水箱落水器|self">和成 HCG 馬桶水箱落水器</option>
+              <option value="浴室崁燈15W自然光4000k|self">浴室崁燈 15W 自然光 4000k</option>
+              <option value="走道燈15W暖白光3000k|self">走道燈 15W 暖白光 3000k</option>
+              <option value="防鳥刺|self|noqty">防鳥刺</option>
+            </optgroup>
+            <optgroup label="廠商提供">
+              <option value="12W暖黃光燈泡|vendor">12W 暖黃光燈泡</option>
+              <option value="10W暖黃光燈泡|vendor">10W 暖黃光燈泡</option>
+              <option value="5W崁燈|vendor">5W 崁燈</option>
+              <option value="三段式開關|vendor">三段式開關</option>
+              <option value="小夜燈|vendor">小夜燈</option>
+              <option value="冷氣遙控器|vendor">冷氣遙控器</option>
+              <option value="落水器|vendor">落水器（馬桶）</option>
+              <option value="浮球開關|vendor">浮球開關</option>
+              <option value="排水管|vendor">排水管</option>
+              <option value="風鼓的軸承|vendor">風鼓的軸承</option>
+              <option value="肥皂架|vendor">肥皂架</option>
+              <option value="水門|vendor">水門</option>
+            </optgroup>
+            <optgroup label="廠商代購，住眾自費">
+              <option value="馬桶水箱蓋|resident|fee:600">馬桶水箱蓋（600元）</option>
+              <option value="蓮蓬頭的水管|resident|fee:150">蓮蓬頭的水管（150元）</option>
+            </optgroup>
+            <option value="__custom__|vendor">＋ 其他（手動輸入）</option>
+          </select>
+          <button class="btn-xs btn-ghost" style="border:1.5px solid #deb84a;color:var(--amber);background:transparent;padding:8px 12px;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;" onclick="addPremat()">＋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="submit-bar">
+    <button class="btn btn-p" id="submit-btn" onclick="submitRepair()" style="padding:15px;font-size:16px;letter-spacing:.5px;">✚ 儲存報修</button>
+  </div>
+</div>
+
+<!-- ══ PAGE 2 維修紀錄 ══ -->
+<div class="page" id="pg-list">
+  <div class="srch">
+    <div class="srch-row">
+      <input type="text" id="s-q" placeholder="🔍 搜尋房號、項目…" oninput="renderList()"/>
+      <select id="s-st" onchange="renderList()" style="font-size:13px;">
+        <option value="">全部</option><option value="pending">待維修</option>
+        <option value="done">已完修</option><option value="deferred">待下次</option><option value="inprog">處理中</option>
+      </select>
+    </div>
+    <div class="sort-row">
+      <span style="font-size:11px;font-weight:700;color:var(--t3);align-self:center;">排序：</span>
+      <div class="sort-btn on" id="sort-top" onclick="setSort('top-down',this)">⬇ 從高樓層往下</div>
+      <div class="sort-btn" id="sort-bot" onclick="setSort('bot-up',this)">⬆ 從低樓層往上</div>
+      <div class="sort-btn" id="sort-date" onclick="setSort('date',this)">📅 報修日期</div>
+    </div>
+  </div>
+  <div class="list-meta">
+    <span class="list-ttl">維修紀錄</span>
+    <span class="count-pill" id="list-count">0</span>
+  </div>
+  <div id="list-body"></div>
+</div>
+
+<!-- ══ PAGE 3 報表 ══ -->
+<div class="page" id="pg-report">
+  <div class="card">
+    <div class="card-hd"><div class="card-hl"><div class="ci-icon blue">📄</div><div><div class="card-ttl">報修單設定</div></div></div></div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="f"><label>廠商</label><input type="text" id="rp-vendor" value="快陞"/></div>
+        <div class="f"><label>年月（如 2026, 5）</label><input type="text" id="rp-ym"/></div>
+      </div>
+      <div class="row2">
+        <div class="f"><label>報修日期</label><input type="text" id="rp-date" placeholder="2026.04.29"/><div class="field-hint">整批報修給廠商的日期</div></div>
+        <div class="f"><label>維修日期</label><input type="text" id="rp-fixdate" placeholder="2026.05.04"/><div class="field-hint">廠商實際來施作的日期</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-hl"><div class="ci-icon blue">☑</div><div><div class="card-ttl">選擇紀錄</div></div></div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-xs" onclick="rpSel(true)">全選</button>
+        <button class="btn btn-ghost btn-xs" onclick="rpSel(false)">全不選</button>
+        <button class="btn btn-ghost btn-xs" onclick="rpSelP()">待維修</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding-top:4px;padding-bottom:4px;"><div id="rp-list"></div></div>
+  </div>
+  <div class="btn-row"><button class="btn btn-a" onclick="exportPremat()">📋 下載預計耗材表（給廠商採購）</button></div>
+  <div class="btn-row"><button class="btn btn-p" onclick="exportReport()">⬇ 下載報修單 Excel（給廠商）</button></div>
+  <div class="btn-row"><button class="btn btn-o" onclick="exportAll()">📊 匯出完整紀錄 Excel（內部管理）</button></div>
+
+  <div style="margin-top:4px;padding:13px 14px;background:var(--red-lt);border:1px solid #f0c0bb;border-radius:var(--r);">
+    <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;">🔄 期數結束 / 重置紀錄</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.5;">下載或匯出完成後，可清除紀錄以開始新一期。建議先下載備份再清除。</div>
+    <div class="btn-row" style="margin-bottom:6px;">
+      <button class="btn btn-ghost" style="border-color:#e08080;color:var(--red);" onclick="clearDone()">清除已完修紀錄</button>
+      <button class="btn btn-d" onclick="clearAll()">清除全部紀錄</button>
+    </div>
+  </div>
+  <div style="height:8px;"></div>
+</div>
+
+<!-- ══ PAGE 4 耗材 ══ -->
+<div class="page" id="pg-mat">
+  <div class="card">
+    <div class="card-hd"><div class="card-hl"><div class="ci-icon amber">📦</div><div><div class="card-ttl">本月耗材用量</div><div class="card-sub">依完工紀錄自動統計</div></div></div></div>
+    <div class="card-body" style="padding:0;"><div class="ctable-wrap">
+      <table class="ctable">
+        <thead><tr><th>耗材項目</th><th>來源</th><th>廠商提供</th><th>妙慧樓自備</th></tr></thead>
+        <tbody id="mat-auto"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-hl"><div class="ci-icon amber">🛒</div><div><div class="card-ttl">本月採購耗材</div><div class="card-sub">廠商請款用，手動填入</div></div></div>
+      <button class="btn btn-ghost btn-xs" onclick="addPur()">＋ 新增</button>
+    </div>
+    <div class="card-body" style="padding:0;"><div class="ctable-wrap">
+      <table class="ctable">
+        <thead><tr><th>採購項目</th><th>數量</th><th>單位</th><th></th></tr></thead>
+        <tbody id="pur-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-a" onclick="exportMat()">⬇ 匯出耗材 Excel</button></div>
+  <div style="height:8px;"></div>
+</div>
+
+<!-- ══ 維修狀況 MODAL ══ -->
+<div class="overlay" id="modal-fix">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-hd">
+      <div><div class="sh-title">更新維修狀況</div><div class="sh-loc" id="fx-loc"></div></div>
+      <span class="sh-close" onclick="closeModal()">×</span>
+    </div>
+    <div class="fx-date-bar">
+      <label>維修日期</label>
+      <input type="text" id="fx-date" placeholder="例：5/4" oninput="autoFixAll()"/>
+      <span style="font-size:11px;color:var(--pri);opacity:.8;">廠商來施作的日期</span>
+    </div>
+    <div class="fx-entries" id="fx-entries"></div>
+    <div style="padding:14px 16px 0;">
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+        <button class="btn btn-g" onclick="saveFix()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nb on" onclick="goPage('add',this)"><svg viewBox="0 0 24 24"><path d="M9 12h6M9 16h6M9 8h6M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>登記</div>
+  <div class="nb" onclick="goPage('list',this)"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/><circle cx="17" cy="18" r="3"/></svg>紀錄</div>
+  <div class="nb" onclick="goPage('report',this)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>報表</div>
+  <div class="nb" onclick="goPage('mat',this)"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>耗材</div>
+</nav>
+<div id="toast"></div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━ CONSTANTS ━━━━━━━━━━━━━━━━━━━━━━━━
+const ITEMS=['主燈','崁燈','壁燈','小夜燈','走道燈','立燈','陽台燈','吸頂燈','日光燈','小崁燈','壁掛式筒燈','餐廳吊燈','照明開關','換氣扇','馬桶','馬桶水箱按鈕','馬桶水箱蓋','馬桶浮球開關','洗手台','洗手台水龍頭','洗手台落水頭','洗手台起泡器','浴室水龍頭','水龍頭','水門','蓮蓬頭的水管','水槽','排水口','排水管','脫水機管線的排水孔','冷氣','冷氣遙控器','插座','椅子','墊片','肥皂架','浴廁置物架','鳥屎','鳥巢'];
+const CMAP={'主燈':['主燈不亮','主燈閃爍','主燈三段式故障','主燈故障','太暗想換燈泡'],'崁燈':['崁燈不亮','崁燈閃爍','崁燈故障','電源關掉仍持續亮燈'],'壁燈':['壁燈不亮','壁燈故障'],'小夜燈':['小夜燈不亮','小夜燈故障'],'走道燈':['走道燈不亮','走道燈故障'],'立燈':['立燈燈泡故障','立燈故障'],'陽台燈':['陽台燈不亮','陽台燈故障'],'吸頂燈':['吸頂燈不亮','吸頂燈故障'],'日光燈':['日光燈不亮','日光燈故障'],'小崁燈':['小崁燈不亮','小崁燈故障'],'壁掛式筒燈':['壁掛式筒燈不亮','壁掛式筒燈故障'],'餐廳吊燈':['餐廳吊燈不亮','餐廳吊燈故障'],'照明開關':['照明開關故障','三段式開關故障'],'換氣扇':['換氣扇故障','換氣扇異音'],'馬桶':['馬桶自動補水','馬桶水流不止、自動補水','馬桶沒水','馬桶需更換落水器','馬桶故障'],'馬桶水箱按鈕':['按鈕按下去不會回彈','馬桶水箱按鈕容易卡住','馬桶水箱按鈕無法自動彈回','馬桶水箱按鈕故障'],'馬桶水箱蓋':['馬桶水箱蓋破裂','馬桶水箱蓋故障'],'馬桶浮球開關':['馬桶浮球開關鬆脫浮在水中','馬桶浮球開關故障'],'洗手台':['洗手台冷水量非常小','洗手台熱水量小','洗手台故障'],'洗手台水龍頭':['冷水量小','熱水出水量小','洗手台水龍頭故障'],'洗手台落水頭':['落水頭鬆脫','洗手台落水頭鬆脫','洗手台落水頭故障'],'洗手台起泡器':['洗手台起泡器故障'],'浴室水龍頭':['熱水出水量小','冷水量小','浴室水龍頭故障'],'水龍頭':['冷水量小','熱水出水量小','水龍頭故障'],'蓮蓬頭的水管':['蓮蓬頭出水量小','蓮蓬頭的水管故障'],'水槽':['水槽水管破裂','水槽排水不順','水槽故障'],'排水口':['排水口堵塞','排水口故障'],'排水管':['排水管故障','排水管堵塞'],'水門':['水門故障','水門漏水'],'冷氣':['冷氣異音','冷氣不冷','冷氣漏水','冷氣故障'],'冷氣遙控器':['冷氣遙控器故障','冷氣遙控器無法操作'],'鳥屎':['陽台有鳥屎'],'鳥巢':['陽台有鳥巢','有鳥蛋'],'插座':['插座故障','插座無電'],'椅子':['椅子故障','椅腳斷裂'],'墊片':['墊片損壞','墊片故障'],'肥皂架':['肥皂架鬆脫','肥皂架故障'],'浴廁置物架':['浴廁置物架鬆脫','浴廁置物架故障'],'脫水機管線的排水孔':['排水孔堵塞','脫水機管線故障']};
+
+// Common part names for fix note composition (item → part options)
+const PART_NAMES={
+  '主燈':['燈泡','三段式開關','燈泡及三段式開關'],
+  '崁燈':['5W崁燈','崁燈'],
+  '壁燈':['燈泡','壁燈'],
+  '小夜燈':['小夜燈'],
+  '走道燈':['走道燈燈泡','走道燈'],
+  '立燈':['燈泡','立燈'],
+  '陽台燈':['燈泡','陽台燈'],
+  '吸頂燈':['燈泡','吸頂燈'],
+  '日光燈':['燈管','日光燈'],
+  '小崁燈':['小崁燈'],
+  '壁掛式筒燈':['燈泡','壁掛式筒燈'],
+  '餐廳吊燈':['燈泡','餐廳吊燈'],
+  '照明開關':['三段式開關','照明開關'],
+  '換氣扇':['風鼓的軸承','換氣扇'],
+  '馬桶':['落水器','馬桶落水器'],
+  '馬桶水箱按鈕':['馬桶水箱按鈕'],
+  '馬桶水箱蓋':['馬桶水箱蓋'],
+  '馬桶浮球開關':['浮球開關'],
+  '洗手台':['洗手台'],
+  '洗手台水龍頭':['洗手台水龍頭'],
+  '洗手台落水頭':['落水頭'],
+  '洗手台起泡器':['起泡器'],
+  '浴室水龍頭':['浴室水龍頭'],
+  '水龍頭':['水龍頭'],
+  '蓮蓬頭的水管':['蓮蓬頭的水管'],
+  '水槽':['水管'],
+  '排水管':['排水管'],
+  '肥皂架':['肥皂架'],
+  '冷氣遙控器':['冷氣遙控器'],
+  'default':['燈泡','開關','水管','零件']
+};
+// src: self=妙慧樓自備, vendor=廠商提供, resident=廠商代購住眾自費
+const MAT_OPTS=[
+  {k:'和成HCG馬桶水箱落水器',lb:'和成 HCG 馬桶水箱落水器',src:'self',noQty:false,hasFee:false},
+  {k:'浴室崁燈15W自然光4000k',lb:'浴室崁燈 15W 自然光 4000k',src:'self',noQty:false,hasFee:false},
+  {k:'走道燈15W暖白光3000k',lb:'走道燈 15W 暖白光 3000k',src:'self',noQty:false,hasFee:false},
+  {k:'防鳥刺',lb:'防鳥刺',src:'self',noQty:true,hasFee:false},
+  {k:'12W暖黃光燈泡',lb:'12W 暖黃光燈泡',src:'vendor',noQty:false,hasFee:false},
+  {k:'10W暖黃光燈泡',lb:'10W 暖黃光燈泡',src:'vendor',noQty:false,hasFee:false},
+  {k:'5W崁燈',lb:'5W 崁燈',src:'vendor',noQty:false,hasFee:false},
+  {k:'三段式開關',lb:'三段式開關',src:'vendor',noQty:false,hasFee:false},
+  {k:'小夜燈',lb:'小夜燈',src:'vendor',noQty:false,hasFee:false},
+  {k:'冷氣遙控器',lb:'冷氣遙控器',src:'vendor',noQty:false,hasFee:false},
+  {k:'落水器',lb:'落水器（馬桶）',src:'vendor',noQty:false,hasFee:false},
+  {k:'浮球開關',lb:'浮球開關',src:'vendor',noQty:false,hasFee:false},
+  {k:'排水管',lb:'排水管',src:'vendor',noQty:false,hasFee:false},
+  {k:'風鼓的軸承',lb:'風鼓的軸承',src:'vendor',noQty:false,hasFee:false},
+  {k:'肥皂架',lb:'肥皂架',src:'vendor',noQty:false,hasFee:false},
+  {k:'馬桶水箱蓋',lb:'馬桶水箱蓋（廠商代購，住眾自費）',src:'resident',noQty:false,hasFee:true,defaultFee:600},
+  {k:'蓮蓬頭的水管',lb:'蓮蓬頭的水管（廠商代購，住眾自費）',src:'resident',noQty:false,hasFee:true,defaultFee:150},
+  {k:'水門',lb:'水門',src:'vendor',noQty:false,hasFee:false},
+];
+const SRC_LB={self:'妙慧樓自備',vendor:'廠商提供',resident:'住眾自費'};
+const SRC_CLS={self:'mss',vendor:'msv',resident:'msr'};
+// Floor sort order
+const FLOOR_ORDER=['頂樓','六','五','四','三','二','一','B1'];
+const ST_LB={pending:'待維修',done:'已完修',deferred:'待下次',inprog:'處理中'};
+const ST_CLS={pending:'b-p',done:'b-d',deferred:'b-df',inprog:'b-prog'};
+
+let records=JSON.parse(localStorage.getItem('mhb7_r')||'[]');
+let purchases=JSON.parse(localStorage.getItem('mhb7_p')||'[]');
+let customMats=JSON.parse(localStorage.getItem('mhb7_cm')||'[]'); // Persistent custom consumables
+let cState={};
+let preMats=[];  // [{name,lb,src,qty,noQty,hasFee,fee}]
+let fixId=null;
+let sortMode='top-down';
+
+function save(){localStorage.setItem('mhb7_r',JSON.stringify(records));}
+function savePur(){localStorage.setItem('mhb7_p',JSON.stringify(purchases));}
+function saveCustomMats(){localStorage.setItem('mhb7_cm',JSON.stringify(customMats));}
+
+function rebuildPrematSel(){
+  const sel=document.getElementById('premat-sel');
+  if(!sel)return;
+  // Remove existing custom optgroup if present
+  const existing=sel.querySelector('optgroup[label="我的自訂耗材"]');
+  if(existing)existing.remove();
+  if(!customMats.length)return;
+  const grp=document.createElement('optgroup');
+  grp.label='我的自訂耗材';
+  customMats.forEach(m=>{
+    const opt=document.createElement('option');
+    opt.value=`${m.k}|${m.src}`;
+    opt.textContent=m.lb+(m.src==='self'?'（自備）':m.src==='resident'?'（住眾自費）':'');
+    grp.appendChild(opt);
+  });
+  // Insert before the custom input option (last option)
+  const lastOpt=sel.querySelector('option[value^="__custom__"]');
+  if(lastOpt)sel.insertBefore(grp,lastOpt);
+  else sel.appendChild(grp);
+}
+function today(){return new Date().toISOString().split('T')[0];}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ INIT ━━━━━━━━━━━━━━━━━━━━━━━━
+function init(){
+  document.getElementById('a-rdate').value=today();
+  const now=new Date();
+  document.getElementById('rp-ym').value=`${now.getFullYear()}, ${now.getMonth()+1}`;
+  buildItemGrid(ITEMS);
+  document.getElementById('a-manual').addEventListener('keydown',e=>{if(e.key==='Enter'){addManual();e.preventDefault();}});
+  rebuildPrematSel();
+  renderAll();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ ITEM GRID ━━━━━━━━━━━━━━━━━━━━━━━━
+function buildItemGrid(list){
+  const sel=getSelItems();
+  document.getElementById('item-grid').innerHTML=list.map(it=>
+    `<div class="ic${sel.includes(it)?' on':''}" data-item="${it}" onclick="toggleItem(this)">${it}</div>`
+  ).join('');
+}
+function filterItems(q){
+  const manuals=[...document.querySelectorAll('.ic[data-manual]')].map(el=>el.dataset.item);
+  const base=q?ITEMS.filter(it=>it.includes(q)):ITEMS;
+  buildItemGrid([...new Set([...base,...manuals])]);
+}
+function getSelItems(){return[...document.querySelectorAll('.ic.on')].map(el=>el.dataset.item);}
+function toggleItem(el){
+  el.classList.toggle('on');
+  if(!el.classList.contains('on'))delete cState[el.dataset.item];
+  rebuildContent();
+}
+function addManual(){
+  const inp=document.getElementById('a-manual');
+  inp.value.trim().split(/[、,，]/).map(s=>s.trim()).filter(Boolean).forEach(name=>{
+    const ex=document.querySelector(`.ic[data-item="${CSS.escape(name)}"]`);
+    if(ex){ex.classList.add('on');}
+    else{
+      const d=document.createElement('div');
+      d.className='ic on';d.dataset.item=name;d.dataset.manual='1';d.textContent=name;
+      d.onclick=function(){this.classList.toggle('on');if(!this.classList.contains('on'))delete cState[name];rebuildContent();};
+      document.getElementById('item-grid').appendChild(d);
+    }
+  });
+  inp.value='';rebuildContent();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ CONTENT AREA ━━━━━━━━━━━━━━━━━━━━━━━━
+function rebuildContent(){
+  const items=getSelItems();
+  const show=items.length>0;
+  document.getElementById('content-card').classList.toggle('hidden',!show);
+  document.getElementById('premat-card').classList.toggle('hidden',!show);
+  if(!show){cState={};return;}
+  Object.keys(cState).forEach(k=>{if(!items.includes(k))delete cState[k];});
+  document.getElementById('content-area').innerHTML=items.map((item,idx)=>{
+    const chips=CMAP[item]||[`${item}故障`];
+    const st=cState[item]||{};
+    return`<div class="ci">
+      <div class="ci-header"><span class="ci-badge">${item}</span><span class="ci-remove" onclick="deselItem('${esc(item)}')">×</span></div>
+      <div class="chips">${chips.map(c=>`<div class="chip${st.chip===c?' on':''}" onclick="pickChip('${esc(item)}','${esc(c)}')">${c}</div>`).join('')}</div>
+      <div class="ci-custom"><input class="fx-inp" type="text" placeholder="自訂描述（會覆蓋上方選擇）" value="${st.custom||''}" oninput="setCS('${esc(item)}','custom',this.value)"/></div>
+      <div class="ci-fields">
+        <input class="fx-inp qty" type="text" placeholder="數量 如 *1、*2" value="${st.qty||''}" oninput="setCS('${esc(item)}','qty',this.value)"/>
+        <input class="fx-inp loc" type="text" placeholder="位置 如 靠床、靠書桌" value="${st.loc||''}" oninput="setCS('${esc(item)}','loc',this.value)"/>
+      </div>
+    </div>`;
+  }).join('');
+}
+function deselItem(item){const el=document.querySelector(`.ic[data-item="${CSS.escape(item)}"]`);if(el)el.classList.remove('on');delete cState[item];rebuildContent();}
+function pickChip(item,chip){if(!cState[item])cState[item]={};cState[item].chip=cState[item].chip===chip?'':chip;rebuildContent();}
+function setCS(item,key,val){if(!cState[item])cState[item]={};cState[item][key]=val;}
+function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ PRE-MAT ━━━━━━━━━━━━━━━━━━━━━━━━
+function addPremat(){
+  const sel=document.getElementById('premat-sel');
+  const v=sel.value; if(!v)return;
+  const parts=v.split('|');
+  let name=parts[0], src=parts[1]||'vendor';
+  // Handle custom input
+  if(name==='__custom__'){
+    const customName=prompt('輸入耗材名稱：','');
+    if(!customName||!customName.trim())return;
+    const customSrc=prompt('來源（廠商提供/妙慧樓自備/住眾自費）：','廠商提供');
+    name=customName.trim();
+    src={廠商提供:'vendor',妙慧樓自備:'self',住眾自費:'resident'}[customSrc]||'vendor';
+    // Save to persistent custom mats list
+    if(!customMats.find(m=>m.k===name)){
+      customMats.push({k:name,lb:name,src,noQty:false,hasFee:false});
+      saveCustomMats();
+      rebuildPrematSel(); // Add to dropdown permanently
+    }
+  }
+  const noQty=parts[2]==='noqty';
+  const feeMatch=(parts[2]||'').match(/fee:(\d+)/);
+  const hasFee=!!feeMatch;
+  const defaultFee=hasFee?+feeMatch[1]:0;
+  const def=[...MAT_OPTS,...customMats].find(m=>m.k===name);
+  const lb=def?def.lb:name;
+  if(preMats.find(m=>m.name===name)){toast('已加入');return;}
+  preMats.push({name,lb,src,noQty,hasFee,fee:defaultFee,qty:''});
+  renderPremat(); sel.value='';
+}
+function renderPremat(){
+  const el=document.getElementById('premat-list');
+  if(!preMats.length){el.innerHTML='';return;}
+  el.innerHTML=preMats.map((m,i)=>`
+    <div class="premat-row">
+      <span class="premat-name">${m.lb}<br><small style="color:var(--t3)">${SRC_LB[m.src]}</small></span>
+      ${m.noQty?'<span style="font-size:11px;color:var(--t3);">不計數量</span>':`<input class="premat-qty" type="number" min="1" placeholder="數量" value="${m.qty||''}" onchange="preMats[${i}].qty=this.value"/>`}
+      ${m.hasFee?`<input class="premat-qty" type="number" placeholder="${m.fee}元" value="${m.fee||''}" onchange="preMats[${i}].fee=this.value" style="width:70px;"/>`:''}
+      <span class="premat-del" onclick="preMats.splice(${i},1);renderPremat()">×</span>
+    </div>`).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ SUBMIT ━━━━━━━━━━━━━━━━━━━━━━━━
+function buildEntries(){
+  return getSelItems().map(item=>{
+    const st=cState[item]||{};
+    const desc=st.custom||st.chip||`${item}故障`;
+    const qty=(st.qty||'').trim(),loc=(st.loc||'').trim();
+    return{item,content:desc+(qty?qty:'')+(loc?`(${loc})`:''),fixStatus:'pending',fixNote:'',fixAct:'更換',fixQty:'',fixItem:item,fixResult:'恢復正常',mats:[]};
+  });
+}
+function submitRepair(){
+  const zone=document.getElementById('a-zone').value;
+  const floor=document.getElementById('a-floor').value;
+  const room=document.getElementById('a-room').value.trim();
+  const rdate=document.getElementById('a-rdate').value;
+  if(!zone||!floor){toast('請選擇區域和樓層');return;}
+  if(!room){toast('請填寫位置/房號');return;}
+  if(!rdate){toast('請填寫報修日期');return;}
+  const entries=buildEntries();
+  if(!entries.length){toast('請選擇報修項目');return;}
+  records.unshift({id:Date.now(),zone,floor,room,rdate,entries,status:'pending',preMats:JSON.parse(JSON.stringify(preMats))});
+  save();resetForm();renderAll();
+  toast('✅ 報修紀錄已儲存');
+  goPage('list',document.querySelectorAll('.nb')[1]);
+}
+function resetForm(){
+  ['a-zone','a-floor','a-room','a-manual'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('a-rdate').value=today();
+  document.querySelectorAll('.ic.on').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.ic[data-manual]').forEach(el=>el.remove());
+  cState={};preMats=[];
+  document.getElementById('content-card').classList.add('hidden');
+  document.getElementById('premat-card').classList.add('hidden');
+  document.getElementById('item-search').value='';
+  document.getElementById('premat-list').innerHTML='';
+  buildItemGrid(ITEMS);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ SORT & LIST ━━━━━━━━━━━━━━━━━━━━━━━━
+function setSort(mode,el){
+  sortMode=mode;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  renderList();
+}
+
+// Room number extractor: gets numeric part for sorting
+function roomNum(room){
+  const m=room.match(/\d+/);return m?+m[0]:0;
+}
+
+function sortedRecords(list){
+  if(sortMode==='date'){
+    return [...list].sort((a,b)=>(b.rdate||'').localeCompare(a.rdate||''));
+  }
+  // Snake sort: floor order + alternating room direction
+  const floorList=sortMode==='top-down'?[...FLOOR_ORDER]:([...FLOOR_ORDER].reverse());
+  // Group by floor
+  const byFloor={};
+  list.forEach(r=>{
+    const f=r.floor;
+    if(!byFloor[f])byFloor[f]=[];
+    byFloor[f].push(r);
+  });
+  const result=[];
+  floorList.forEach((f,fi)=>{
+    if(!byFloor[f])return;
+    // Alternating: even index (0,2,4…) = descending room, odd = ascending
+    const asc=fi%2!==0;
+    const sorted=[...byFloor[f]].sort((a,b)=>asc?roomNum(a.room)-roomNum(b.room):roomNum(b.room)-roomNum(a.room));
+    result.push(...sorted);
+  });
+  return result;
+}
+
+function renderList(){
+  const q=document.getElementById('s-q').value.toLowerCase();
+  const sf=document.getElementById('s-st').value;
+  let list=records.filter(r=>{
+    const txt=[r.room,r.floor,r.zone,...r.entries.map(e=>e.item+e.content)].join(' ').toLowerCase();
+    return(!q||txt.includes(q))&&(!sf||r.status===sf);
+  });
+  list=sortedRecords(list);
+  document.getElementById('list-count').textContent=list.length;
+  const el=document.getElementById('list-body');
+  if(!list.length){el.innerHTML='<div class="empty">沒有符合的紀錄</div>';return;}
+  el.innerHTML=list.map(r=>{
+    const entriesHtml=r.entries.map(e=>{
+      const es=e.fixStatus||'pending';
+      const matStr=(e.mats||[]).length?e.mats.map(m=>`${m.lb||m.name}${m.noQty?'':('×'+(m.qty||'?'))}${m.hasFee&&m.fee?`(${m.fee}元)`:''}(${SRC_LB[m.src]||m.src})`).join('、'):'';
+      return`<div class="re">
+        <div class="re-top"><div class="re-item">🔧 ${e.item}</div><span class="badge ${ST_CLS[es]}">${ST_LB[es]}</span></div>
+        <div class="re-content">📝 ${e.content}</div>
+        ${e.fixNote?`<div class="re-fix">✅ ${e.fixNote}</div>`:''}
+        ${matStr?`<div class="re-mats">📦 ${matStr}</div>`:''}
+      </div>`;
+    }).join('');
+    const prematStr=(r.preMats||[]).length?r.preMats.map(m=>`${m.lb}${m.noQty?'':('×'+(m.qty||'?'))}`).join('、'):'';
+    return`<div class="rec">
+      <div class="rec-hd">
+        <div><div class="rec-loc">${r.floor}F ${r.room}<small>${r.zone}</small></div><div class="rec-rdate">報修：${r.rdate||'─'}</div></div>
+        <span class="badge ${ST_CLS[r.status]}">${ST_LB[r.status]}</span>
+      </div>
+      <div class="rec-entries">${entriesHtml}</div>
+      ${prematStr?`<div style="padding:7px 13px;font-size:12px;color:var(--amber);background:var(--amber-lt);border-top:1px solid var(--bdr);">📋 預計耗材：${prematStr}</div>`:''}
+      <div class="rec-acts">
+        <button class="btn btn-sm" style="background:var(--pri-lt);color:var(--pri);border:none;font-weight:700;" onclick="openFix(${r.id})">更新維修狀況</button>
+        <button class="btn btn-ghost btn-sm" onclick="delRec(${r.id})">刪除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function delRec(id){if(!confirm('確定刪除？'))return;records=records.filter(r=>r.id!==id);save();renderAll();toast('已刪除');}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ STATUS MODAL ━━━━━━━━━━━━━━━━━━━━━━━━
+function openFix(id){
+  const r=records.find(r=>r.id===id);if(!r)return;
+  fixId=id;
+  document.getElementById('fx-loc').textContent=`${r.floor}F ${r.room}（${r.zone}）`;
+  document.getElementById('fx-date').value=r.fixDate||'';
+  document.getElementById('fx-entries').innerHTML=r.entries.map((e,i)=>buildFxEntry(e,i)).join('');
+  r.entries.forEach((e,i)=>{
+    const aEl=document.getElementById(`fxa-${i}`);if(aEl&&e.fixAct)aEl.value=e.fixAct;
+    const rEl=document.getElementById(`fxr-${i}`);if(rEl&&e.fixResult)rEl.value=e.fixResult;
+  });
+  document.getElementById('modal-fix').classList.add('open');
+}
+function buildFxEntry(e,i){
+  const sd=e.fixStatus==='done'?'sd':'',sdf=e.fixStatus==='deferred'?'sdf':'',spg=e.fixStatus==='inprog'?'spg':'';
+  return`<div class="fxe">
+    <div class="fxe-ttl">${e.item}</div>
+    <div class="fxe-content">${e.content}</div>
+    <div class="status-row">
+      <div class="st-btn ${sd}" id="fsd-${i}" onclick="setFxSt(${i},'done')">✅ 已完修</div>
+      <div class="st-btn ${sdf}" id="fsdf-${i}" onclick="setFxSt(${i},'deferred')">🔜 待下次</div>
+      <div class="st-btn ${spg}" id="fspg-${i}" onclick="setFxSt(${i},'inprog')">🔄 處理中</div>
+    </div>
+    <div class="compose-grid">
+      <select id="fxa-${i}" class="fx-sel" style="margin-bottom:0;" onchange="autoFix(${i})"><option>更換</option><option>調整</option><option>加裝</option><option>清除</option><option>協助</option></select>
+      <input id="fxq-${i}" class="fx-inp" type="text" placeholder="數量 如：1個、2顆" value="${e.fixQty||''}" oninput="autoFix(${i})"/>
+    </div>
+    <div style="position:relative;margin-bottom:7px;">
+      <input id="fxitem-${i}" class="fx-inp" type="text" value="${e.fixItem||e.item}" oninput="autoFix(${i})" placeholder="維修項目名稱（可選下方常用）" list="fxitem-list-${i}" style="width:100%;"/>
+      <datalist id="fxitem-list-${i}">${(PART_NAMES[e.item]||PART_NAMES['default']).map(p=>`<option value="${p}">`).join('')}</datalist>
+    </div>
+    <select id="fxr-${i}" class="fx-sel" onchange="autoFix(${i})">
+      <option>恢復正常</option><option>現場測試可正常使用</option><option>現場測試沒有異音</option>
+      <option>列下次處理</option><option>有鳥蛋，列下個月施作</option><option>尚未到貨</option><option>已自行更換</option>
+    </select>
+    <textarea id="fxn-${i}" class="fx-inp" rows="2" placeholder="修復說明（自動組合後可手動修改）" style="min-height:52px;resize:vertical;">${e.fixNote||''}</textarea>
+    <div class="mat-section">
+      <label>耗材（更換才填；調整類免填）</label>
+      <div id="fxmats-${i}">${buildMatHtml(e.mats||[],i)}</div>
+      <div class="mat-add-row">
+        <select id="fxmsel-${i}" class="fx-sel" style="margin-bottom:0;">
+          <option value="">── 選擇耗材 ──</option>
+          <optgroup label="妙慧樓自備">${MAT_OPTS.filter(m=>m.src==='self').map(m=>`<option value="${m.k}">${m.lb}</option>`).join('')}</optgroup>
+          <optgroup label="廠商提供">${MAT_OPTS.filter(m=>m.src==='vendor').map(m=>`<option value="${m.k}">${m.lb}</option>`).join('')}</optgroup>
+          <optgroup label="廠商代購，住眾自費">${MAT_OPTS.filter(m=>m.src==='resident').map(m=>`<option value="${m.k}">${m.lb}</option>`).join('')}</optgroup>
+          <optgroup label="我的自訂耗材" id="fxmsel-custom-grp-${i}">${customMats.map(m=>`<option value="${m.k}">${m.lb}</option>`).join('')}</optgroup>
+          <option value="__custom__">＋ 其他（自訂新增）…</option>
+        </select>
+        <button class="btn btn-ghost btn-xs" onclick="addMat(${i})">＋</button>
+      </div>
+    </div>
+  </div>`;
+}
+function buildMatHtml(mats,ei){
+  if(!mats.length)return'<div class="mat-empty">無耗材</div>';
+  return`<div class="mat-list">${mats.map((m,mi)=>`
+    <div class="mat-row">
+      <div class="mat-info"><div class="mat-name">${m.lb||m.name}</div><span class="mat-src-badge ${SRC_CLS[m.src]||'msv'}">${SRC_LB[m.src]||m.src}</span></div>
+      ${m.hasFee?`<div style="text-align:right;flex-shrink:0;"><div class="mat-lbl">金額(元)</div><input type="number" class="mat-fee-inp" id="mat-fee-${ei}-${mi}" value="${m.fee||m.defaultFee||''}" oninput="updMat(${ei},${mi},'fee',this.value)"/></div>`:''}
+      ${m.noQty?'<span style="font-size:11px;color:var(--t3);flex-shrink:0;">不計數量</span>':`<div style="text-align:right;flex-shrink:0;"><div class="mat-lbl">數量</div><input type="number" class="mat-qty-inp" id="mat-qty-${ei}-${mi}" min="1" value="${m.qty||''}" oninput="updMat(${ei},${mi},'qty',this.value)"/></div>`}
+      <span class="mat-del" onclick="rmMat(${ei},${mi})">×</span>
+    </div>`).join('')}</div>`;
+}
+function setFxSt(i,st){
+  const r=records.find(r=>r.id===fixId);if(r)r.entries[i].fixStatus=st;
+  ['done','deferred','inprog'].forEach(s=>document.getElementById(`fs${s==='done'?'d':s==='deferred'?'df':'pg'}-${i}`).className='st-btn'+(st===s?({done:' sd',deferred:' sdf',inprog:' spg'}[s]):''));
+}
+function autoFix(i){
+  const date=document.getElementById('fx-date').value.trim();
+  const act=document.getElementById(`fxa-${i}`).value;
+  const qty=document.getElementById(`fxq-${i}`).value.trim();
+  const item=document.getElementById(`fxitem-${i}`).value.trim();
+  const result=document.getElementById(`fxr-${i}`).value;
+  document.getElementById(`fxn-${i}`).value=(date||'')+act+(qty||'')+(item||'')+'後，'+result;
+}
+function autoFixAll(){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries.forEach((_,i)=>autoFix(i));}
+function addMat(ei){
+  const sel=document.getElementById(`fxmsel-${ei}`);
+  const k=sel.value;if(!k)return;
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  let mObj;
+  if(k==='__custom__'){
+    const name=prompt('耗材名稱：','');if(!name)return;
+    const srcStr=prompt('來源（廠商提供/妙慧樓自備/住眾自費）：','廠商提供');
+    const src={廠商提供:'vendor',妙慧樓自備:'self',住眾自費:'resident'}[srcStr]||'vendor';
+    mObj={name,lb:name,src,noQty:false,hasFee:false,qty:''};
+    if(!customMats.find(m=>m.k===name)){customMats.push({k:name,lb:name,src,noQty:false,hasFee:false});saveCustomMats();}
+  }
+  else{const def=MAT_OPTS.find(m=>m.k===k);if(!def)return;if(r.entries[ei].mats.find(m=>m.name===def.k)){toast('已加入');return;}mObj={name:def.k,lb:def.lb,src:def.src,noQty:def.noQty,hasFee:def.hasFee,defaultFee:def.defaultFee,qty:'',fee:def.defaultFee||''};}
+  r.entries[ei].mats.push(mObj);
+  document.getElementById(`fxmats-${ei}`).innerHTML=buildMatHtml(r.entries[ei].mats,ei);
+  sel.value='';
+}
+function rmMat(ei,mi){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries[ei].mats.splice(mi,1);document.getElementById(`fxmats-${ei}`).innerHTML=buildMatHtml(r.entries[ei].mats,ei);}
+function updMat(ei,mi,key,val){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries[ei].mats[mi][key]=val;}
+function closeModal(){document.getElementById('modal-fix').classList.remove('open');}
+function saveFix(){
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  r.fixDate=document.getElementById('fx-date').value;
+  r.entries.forEach((e,i)=>{
+    e.fixAct=document.getElementById(`fxa-${i}`).value;
+    e.fixQty=document.getElementById(`fxq-${i}`).value;
+    e.fixItem=document.getElementById(`fxitem-${i}`).value;
+    e.fixResult=document.getElementById(`fxr-${i}`).value;
+    e.fixNote=document.getElementById(`fxn-${i}`).value;
+    // Re-read ALL mat qty/fee values from DOM inputs before saving
+    (e.mats||[]).forEach((m,mi)=>{
+      const qEl=document.querySelector(`#fxmats-${i} .mat-qty-inp:nth-of-type(${mi+1})`);
+      const fEl=document.querySelector(`#fxmats-${i} .mat-fee-inp:nth-of-type(${mi+1})`);
+      // More reliable: read by data attribute
+      const matEl=document.getElementById(`mat-qty-${i}-${mi}`);
+      const feeEl=document.getElementById(`mat-fee-${i}-${mi}`);
+      if(matEl) m.qty=matEl.value;
+      if(feeEl) m.fee=feeEl.value;
+    });
+  });
+  const sts=r.entries.map(e=>e.fixStatus||'pending');
+  r.status=sts.every(s=>s==='done')?'done':sts.some(s=>s==='inprog')?'inprog':sts.some(s=>s==='deferred')?'deferred':'pending';
+  save();renderAll();closeModal();toast('✅ 維修狀況已更新');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ EXCEL EXPORT ━━━━━━━━━━━━━━━━━━━━━━━━
+// Style helpers — SheetJS 0.18.5 with {cellStyles:true}
+const B_THIN={top:{style:'thin',color:{rgb:'FF999999'}},bottom:{style:'thin',color:{rgb:'FF999999'}},left:{style:'thin',color:{rgb:'FF999999'}},right:{style:'thin',color:{rgb:'FF999999'}}};
+const B_MED={top:{style:'medium',color:{rgb:'FF1A4A78'}},bottom:{style:'medium',color:{rgb:'FF1A4A78'}},left:{style:'medium',color:{rgb:'FF1A4A78'}},right:{style:'medium',color:{rgb:'FF1A4A78'}}};
+
+function cellStyle(align,isBold,bgRgb,textRgb){
+  return{
+    font:{name:'Calibri',sz:13,bold:!!isBold,color:{rgb:textRgb||'1A1816'}},
+    fill:bgRgb?{fgColor:{rgb:bgRgb},patternType:'solid'}:{},
+    alignment:{horizontal:align||'center',vertical:'center',wrapText:true},
+    border:B_THIN
+  };
+}
+function hdrStyle(align){
+  return{font:{name:'Calibri',sz:13,bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1A4A78'},patternType:'solid'},alignment:{horizontal:align||'center',vertical:'center',wrapText:true},border:B_MED};
+}
+function titleStyle(){
+  return{font:{name:'Calibri',sz:14,bold:true,color:{rgb:'1A4A78'}},fill:{fgColor:{rgb:'EAF0F9'},patternType:'solid'},alignment:{horizontal:'center',vertical:'center'},border:B_THIN};
+}
+function altStyle(align,rowIdx){
+  const bg=rowIdx%2===0?'FFFFFF':'F2F6FC';
+  return{font:{name:'Calibri',sz:13,color:{rgb:'1A1816'}},fill:{fgColor:{rgb:bg},patternType:'solid'},alignment:{horizontal:align||'center',vertical:'center',wrapText:true},border:B_THIN};
+}
+
+function setCell(ws,r,c,val,style,isDate){
+  const addr=XLSX.utils.encode_cell({r,c});
+  if(isDate&&val){ws[addr]={t:'d',v:new Date(val),s:style};}
+  else if(typeof val==='number'){ws[addr]={t:'n',v:val,s:style};}
+  else{ws[addr]={t:'s',v:val==null?'':String(val),s:style};}
+}
+
+// Alignment arrays are defined inline in each export function
+
+function exportPremat(){
+  const vendor=document.getElementById('rp-vendor').value||'快陞';
+  const rpDate=document.getElementById('rp-date').value;
+  const ym=document.getElementById('rp-ym').value.split(',').map(s=>s.trim());
+  const year=ym[0]||new Date().getFullYear(),month=ym[1]||(new Date().getMonth()+1);
+  const ids=[...document.querySelectorAll('[data-rpid]:checked')].map(el=>+el.dataset.rpid);
+  const sel=records.filter(r=>ids.includes(r.id));
+  if(!sel.length){toast('請勾選紀錄');return;}
+  const matMap={};
+  sel.forEach(r=>{
+    (r.preMats||[]).forEach(m=>{
+      const key=m.name;
+      if(!matMap[key])matMap[key]={lb:m.lb||m.name,src:m.src,qty:0,noQty:m.noQty,unit:'個'};
+      if(!m.noQty&&m.qty) matMap[key].qty+=+m.qty||0;
+    });
+  });
+  const vals=Object.values(matMap);
+  if(!vals.length){toast('所選紀錄中沒有預計耗材資料');return;}
+  const S=XB.S,ds=XB.ds;
+  const titleText=year+'年'+month+'月 所需耗材（廠商：'+vendor+'　報修日期：'+rpDate+'）';
+  const dataRows=vals.filter(m=>m.src==='vendor').concat(vals.filter(m=>m.src==='self')).concat(vals.filter(m=>m.src==='resident'));
+  const rows=[];
+  rows.push({ht:32,cells:[{v:titleText,s:S.TI},{v:'',s:S.TI},{v:'',s:S.TI},{v:'',s:S.TI},{v:'',s:S.TI}]});
+  rows.push({ht:39,cells:[{v:'編號',s:S.HC},{v:'所需耗材',s:S.HC},{v:'數量',s:S.HC},{v:'單位',s:S.HC},{v:'備註',s:S.HC}]});
+  dataRows.forEach((m,i)=>{
+    rows.push({ht:39,cells:[
+      {v:i+1,s:ds(i,'center')},
+      {v:m.lb,s:ds(i,'left')},
+      {v:m.noQty?'─':(m.qty||''),s:ds(i,'center')},
+      {v:m.noQty?'─':m.unit,s:ds(i,'center')},
+      {v:'',s:ds(i,'left')}
+    ]});
+  });
+  XB.dl(year+'年'+month+'月_妙慧樓所需耗材.xlsx','所需耗材',rows,[8,36,10,8,20],[{r1:0,c1:0,r2:0,c2:4}]);
+  toast('✅ 預計耗材表已下載');
+}
+function exportReport(){
+  const vendor=document.getElementById('rp-vendor').value||'快陞';
+  const rpDate=document.getElementById('rp-date').value;
+  const ym=document.getElementById('rp-ym').value.split(',').map(s=>s.trim());
+  const year=ym[0]||new Date().getFullYear(),month=ym[1]||(new Date().getMonth()+1);
+  const ids=[...document.querySelectorAll('[data-rpid]:checked')].map(el=>+el.dataset.rpid);
+  const sel=records.filter(r=>ids.includes(r.id));
+  if(!sel.length){toast('請勾選紀錄');return;}
+
+  const S=XB.S,ds=XB.ds;
+  // Cols: 序號 報修日期 報修項目 區域 樓層 位置/房號 報修內容 預計耗材項目 廠商提供數量 妙慧樓自備數量
+  const AL=['center','center','center','center','center','center','left','left','center','center'];
+  const titleText=year+'年'+month+'月 報修單（廠商：'+vendor+'　報修日期：'+rpDate+'）';
+
+  const rows=[];
+  rows.push({ht:32,cells:AL.map((_,ci)=>({v:ci===0?titleText:'',s:S.TI}))});
+  rows.push({ht:39,cells:[
+    {v:'序號',s:S.HC},{v:'報修日期',s:S.HC},{v:'報修項目',s:S.HC},
+    {v:'區域',s:S.HC},{v:'樓層',s:S.HC},{v:'位置/房號',s:S.HC},
+    {v:'報修內容',s:S.HL},{v:'預計耗材項目',s:S.HL},
+    {v:'廠商提供數量',s:S.HC},{v:'妙慧樓自備數量',s:S.HC}
+  ]});
+
+  let seq=1, dataRowIdx=0;
+  sel.forEach(r=>{
+    const pmats=(r.preMats&&r.preMats.length)?r.preMats:[null];
+    r.entries.forEach((e,ei)=>{
+      pmats.forEach((pm,pmi)=>{
+        const isFirst=ei===0&&pmi===0;
+        const isEFirst=pmi===0;
+        const ri=dataRowIdx++;
+        const dsc=ds(ri,'center'), dsl=ds(ri,'left');
+        rows.push({ht:39,cells:[
+          {v:isFirst?seq:null,s:dsc},
+          {v:isFirst?(r.rdate||null):null,s:dsc},
+          {v:isEFirst?e.item:null,s:dsc},
+          {v:isFirst?r.zone:null,s:dsc},
+          {v:isFirst?r.floor:null,s:dsc},
+          {v:isFirst?r.room:null,s:dsc},
+          {v:isEFirst?e.content:null,s:dsl},
+          {v:pm?(pm.lb||pm.name):null,s:dsl},
+          {v:pm&&!pm.noQty&&pm.src==='vendor'?(+pm.qty||null):null,s:dsc},
+          {v:pm&&!pm.noQty&&pm.src==='self'?(+pm.qty||null):(pm&&pm.noQty?(pm.lb||pm.name):null),s:dsc},
+        ]});
+      });
+    });
+    seq++;
+  });
+
+  const merges=[{r1:0,c1:0,r2:0,c2:9}];
+  const cols=[6,13,14,8,6,14,30,26,12,12];
+  XB.dl(year+'年'+month+'月_妙慧樓報修單.xlsx',month+'月維修-已完成',rows,cols,merges);
+  toast('✅ 報修單已下載');
+}
+
+function exportAll(){
+  const vendor=document.getElementById('rp-vendor').value||'快陞';
+  const rpDate=document.getElementById('rp-date').value;
+  const fxDate=document.getElementById('rp-fixdate').value;
+  const ym=document.getElementById('rp-ym').value.split(',').map(s=>s.trim());
+  const year=ym[0]||new Date().getFullYear(),month=ym[1]||(new Date().getMonth()+1);
+
+  const S=XB.S,ds=XB.ds;
+  // 14 cols: 序號 報修日期 廠商 維修日期 區域 樓層 位置/房號 報修項目 報修內容 維修狀態 修復說明 耗材項目 耗材數量(廠商提供) 耗材數量(妙慧樓自備)
+  const AL=['center','center','center','center','center','center','center','center','left','center','left','left','center','center'];
+  const titleText=year+'年'+month+'月 維修完整紀錄（廠商：'+vendor+'　報修日期：'+rpDate+'　維修日期：'+fxDate+'）';
+
+  const rows=[];
+  rows.push({ht:32,cells:AL.map((_,ci)=>({v:ci===0?titleText:'',s:S.TI}))});
+  rows.push({ht:39,cells:[
+    {v:'序號',s:S.HC},{v:'報修日期',s:S.HC},{v:'廠商',s:S.HC},{v:'維修日期',s:S.HC},
+    {v:'區域',s:S.HC},{v:'樓層',s:S.HC},{v:'位置/房號',s:S.HC},{v:'報修項目',s:S.HC},
+    {v:'報修內容',s:S.HL},{v:'維修狀態',s:S.HC},{v:'修復說明',s:S.HL},
+    {v:'耗材項目',s:S.HL},{v:'耗材數量(廠商提供)',s:S.HC},{v:'耗材數量(妙慧樓自備)',s:S.HC}
+  ]});
+
+  let dataRowIdx=0;
+  records.forEach((r,ri)=>{
+    r.entries.forEach((e,ei)=>{
+      const mats=(e.mats&&e.mats.length)?e.mats:[null];
+      mats.forEach((m,mi)=>{
+        // isFirst: first row of this record (fills record-level fields)
+        // isEFirst: first mat of this entry (fills entry-level fields)
+        // For multi-mat rows: repeat entry-level AND record-level fields
+        // so every mat row has complete context — no empty rows
+        const isFirst=ei===0&&mi===0;
+        const dri=dataRowIdx++;
+        const dsc=ds(dri,'center'), dsl=ds(dri,'left');
+        rows.push({ht:39,cells:[
+          {v:isFirst?ri+1:null,s:dsc},
+          {v:isFirst?(r.rdate||null):null,s:dsc},
+          {v:isFirst?vendor:null,s:dsc},
+          {v:isFirst?(r.fixDate||fxDate||null):null,s:dsc},
+          {v:isFirst?r.zone:null,s:dsc},
+          {v:isFirst?r.floor:null,s:dsc},
+          {v:isFirst?r.room:null,s:dsc},
+          {v:e.item,s:dsc},
+          {v:e.content,s:dsl},
+          {v:ST_LB[e.fixStatus||'pending'],s:dsc},
+          {v:e.fixNote||null,s:dsl},
+          {v:m?(m.lb||m.name):null,s:dsl},
+          {v:m&&!m.noQty&&m.src==='vendor'?(+m.qty||null):null,s:dsc},
+          {v:m&&!m.noQty&&m.src==='self'?(+m.qty||null):(m&&m.noQty?(m.lb||m.name):null),s:dsc},
+        ]});
+      });
+    });
+  });
+
+  // ── Sheet 2: 耗材數量 ──
+  const matMap=buildMatMap();
+  const matRows=[];
+  const matTitleText=year+'年'+month+'月 耗材數量';
+  matRows.push({ht:32,cells:[{v:matTitleText,s:S.TI},{v:'',s:S.TI},{v:'',s:S.TI},{v:'',s:S.TI}]});
+  matRows.push({ht:39,cells:[{v:'耗材項目',s:S.HL},{v:'來源',s:S.HC},{v:'廠商提供',s:S.HC},{v:'妙慧樓自備',s:S.HC}]});
+  Object.values(matMap).forEach((m,i)=>{
+    matRows.push({ht:39,cells:[
+      {v:m.lb,s:ds(i,'left')},
+      {v:SRC_LB[m.src],s:ds(i,'center')},
+      {v:m.src==='vendor'&&!m.noQty?(m.tv||null):null,s:ds(i,'center')},
+      {v:m.src==='self'&&!m.noQty?(m.ts||null):null,s:ds(i,'center')}
+    ]});
+  });
+  if(!Object.keys(matMap).length){
+    matRows.push({ht:39,cells:[{v:'尚無耗材紀錄',s:ds(0,'left')},{v:'',s:ds(0,'center')},{v:'',s:ds(0,'center')},{v:'',s:ds(0,'center')}]});
+  }
+
+  const sheet1={name:month+'月維修完整紀錄',rows,cols:[6,13,8,12,8,6,14,14,28,8,28,24,12,12],merges:[{r1:0,c1:0,r2:0,c2:13}]};
+  const sheet2={name:month+'月耗材數量',rows:matRows,cols:[32,12,12,12],merges:[{r1:0,c1:0,r2:0,c2:3}]};
+  XB.dl2(year+'年'+month+'月_妙慧樓完整紀錄.xlsx',[sheet1,sheet2]);
+  toast('✅ 完整紀錄（含耗材頁籤）已下載');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ REPORT LIST ━━━━━━━━━━━━━━━━━━━━━━━━
+function renderRpList(){
+  const el=document.getElementById('rp-list');
+  if(!records.length){el.innerHTML='<div class="empty">尚無紀錄</div>';return;}
+  el.innerHTML=records.map(r=>`
+    <div class="rp-item">
+      <input type="checkbox" data-rpid="${r.id}" checked/>
+      <div class="rp-info" onclick="this.previousElementSibling.click()">
+        <div style="font-size:14px;font-weight:700;">${r.floor}F ${r.room} <span style="color:var(--t3);font-weight:400;">${r.zone}</span>
+          <span class="badge ${ST_CLS[r.status]}" style="margin-left:6px;">${ST_LB[r.status]}</span>
+        </div>
+        <div style="font-size:12px;color:var(--t3);margin-top:2px;">${r.entries.map(e=>e.item).join('、')}</div>
+      </div>
+    </div>`).join('');
+}
+function rpSel(v){document.querySelectorAll('[data-rpid]').forEach(el=>el.checked=v);}
+function rpSelP(){document.querySelectorAll('[data-rpid]').forEach(el=>{const r=records.find(r=>r.id===+el.dataset.rpid);el.checked=r&&r.status==='pending';});}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ MAT PAGE ━━━━━━━━━━━━━━━━━━━━━━━━
+function buildMatMap(){
+  const map={};
+  records.forEach(r=>r.entries.forEach(e=>(e.mats||[]).forEach(m=>{
+    if(!map[m.name])map[m.name]={name:m.name,lb:m.lb||m.name,src:m.src,tv:0,ts:0,noQty:m.noQty};
+    if(!m.noQty&&m.qty){if(m.src==='vendor')map[m.name].tv+=+m.qty||0;else if(m.src==='self')map[m.name].ts+=+m.qty||0;}
+  })));
+  return map;
+}
+function renderMat(){
+  const map=buildMatMap();const vals=Object.values(map);
+  document.getElementById('mat-auto').innerHTML=vals.length
+    ?vals.map(m=>`<tr><td>${m.lb}</td><td><span class="mat-src-badge ${SRC_CLS[m.src]||'msv'}">${SRC_LB[m.src]}</span></td><td style="text-align:center;">${m.src==='vendor'&&!m.noQty?(m.tv||'─'):'─'}</td><td style="text-align:center;">${m.src==='self'&&!m.noQty?(m.ts||'─'):'─'}</td></tr>`).join('')
+    :'<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--t3);">尚無耗材紀錄</td></tr>';
+  document.getElementById('pur-body').innerHTML=purchases.map((p,i)=>`<tr>
+    <td><input type="text" value="${p.name||''}" style="width:100%;font-size:13px;" onchange="purchases[${i}].name=this.value;savePur()"/></td>
+    <td><input type="number" value="${p.qty||''}" style="width:60px;text-align:center;" onchange="purchases[${i}].qty=this.value;savePur()"/></td>
+    <td><input type="text" value="${p.unit||'個'}" style="width:38px;" onchange="purchases[${i}].unit=this.value;savePur()"/></td>
+    <td><span onclick="purchases.splice(${i},1);savePur();renderMat();" style="color:var(--red);cursor:pointer;font-size:18px;padding:0 4px;">×</span></td>
+  </tr>`).join('');
+}
+function addPur(){purchases.push({name:'',qty:'',unit:'個'});savePur();renderMat();}
+function exportMat(){
+  const month=new Date().getMonth()+1;
+  const year=new Date().getFullYear();
+  const map=buildMatMap();
+  const S=XB.S,ds=XB.ds;
+
+  // Sheet 1: 耗材數量
+  const rows1=[];
+  rows1.push({ht:32,cells:[{v:year+'年'+month+'月份耗材數量',s:S.TI},{v:'',s:S.TI},{v:'',s:S.TI},{v:'',s:S.TI}]});
+  rows1.push({ht:39,cells:[{v:'使用耗材',s:S.HL},{v:'來源',s:S.HC},{v:'廠商提供',s:S.HC},{v:'妙慧樓自備',s:S.HC}]});
+  Object.values(map).forEach((m,i)=>{
+    const dsc=ds(i,'center'), dsl=ds(i,'left');
+    rows1.push({ht:39,cells:[
+      {v:m.lb,s:dsl},
+      {v:SRC_LB[m.src],s:dsc},
+      {v:m.src==='vendor'&&!m.noQty?(m.tv||null):null,s:dsc},
+      {v:m.src==='self'&&!m.noQty?(m.ts||null):null,s:dsc}
+    ]});
+  });
+
+  // Sheet 2: 採購耗材
+  const rows2=[];
+  rows2.push({ht:32,cells:[{v:year+'年'+month+'月份採購耗材',s:S.TI},{v:'',s:S.TI},{v:'',s:S.TI}]});
+  rows2.push({ht:39,cells:[{v:'採購項目',s:S.HL},{v:'數量',s:S.HC},{v:'單位',s:S.HC}]});
+  purchases.forEach((p,i)=>{
+    rows2.push({ht:39,cells:[{v:p.name,s:ds(i,'left')},{v:p.qty?+p.qty:null,s:ds(i,'center')},{v:p.unit,s:ds(i,'center')}]});
+  });
+
+  // Download sheet 1 (sheet 2 would need multi-sheet support - for now combine)
+  const merges1=[{r1:0,c1:0,r2:0,c2:3}];
+  const merges2=[{r1:0,c1:0,r2:0,c2:2}];
+  XB.dl(year+'年'+month+'月_妙慧樓耗材數量.xlsx',month+'月份耗材數量',rows1,[32,12,12,12],merges1);
+  setTimeout(()=>{
+    XB.dl(year+'年'+month+'月_妙慧樓採購耗材.xlsx',month+'月份採購耗材',rows2,[32,10,8],merges2);
+  },500);
+  toast('✅ 耗材 Excel 已下載');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━ UTILS ━━━━━━━━━━━━━━━━━━━━━━━━
+function clearDone(){
+  const cnt=records.filter(r=>r.status==='done').length;
+  if(!cnt){toast('沒有已完修的紀錄');return;}
+  if(!confirm(`確定清除 ${cnt} 筆已完修的紀錄？\n建議先匯出備份。`))return;
+  records=records.filter(r=>r.status!=='done');
+  save();renderAll();toast(`✅ 已清除 ${cnt} 筆已完修紀錄`);
+}
+function clearAll(){
+  if(!records.length){toast('沒有紀錄');return;}
+  if(!confirm(`確定清除全部 ${records.length} 筆紀錄？\n此操作無法還原，建議先匯出備份。`))return;
+  const cnt=records.length;
+  records=[];
+  save();renderAll();toast(`✅ 已清除全部 ${cnt} 筆紀錄`);
+}
+function renderAll(){
+  const pending=records.filter(r=>r.status==='pending').length;
+  const badge=document.getElementById('pending-badge');
+  badge.textContent=pending+' 待維修';badge.className='hdr-pill'+(pending>0?' urgent':'');
+  renderList();renderRpList();renderMat();
+}
+function goPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-'+name).classList.add('on');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+}
+function toast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  clearTimeout(window._t);window._t=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+init();
+
+// ═══════════════════════════════════════════════════════════════
+// XB — Pure JS XLSX Builder (bypasses SheetJS style limitations)
+// ═══════════════════════════════════════════════════════════════
+(function(){
+const _CT=new Uint32Array(256);for(let n=0;n<256;n++){let v=n;for(let k=0;k<8;k++)v=(v&1)?(0xEDB88320^(v>>>1)):(v>>>1);_CT[n]=v;}
+function _crc(d){let c=0xFFFFFFFF;for(let i=0;i<d.length;i++)c=_CT[(c^d[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+function _u32(n){const b=new Uint8Array(4);new DataView(b.buffer).setUint32(0,n,true);return b;}
+function _u16(n){const b=new Uint8Array(2);new DataView(b.buffer).setUint16(0,n,true);return b;}
+function _cat(a){const t=a.reduce((s,x)=>s+x.length,0),o=new Uint8Array(t);let p=0;for(const x of a){o.set(x,p);p+=x.length;}return o;}
+function _enc(s){return new TextEncoder().encode(s);}
+function _zip(files){
+  const es=[];let off=0;
+  for(const[nm,data]of files){
+    const nb=_enc(nm),db=typeof data==='string'?_enc(data):data,crc=_crc(db);
+    const loc=_cat([new Uint8Array([0x50,0x4B,0x03,0x04,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),_u32(crc),_u32(db.length),_u32(db.length),_u16(nb.length),_u16(0),nb,db]);
+    es.push({nb,crc,sz:db.length,off,loc});off+=loc.length;
+  }
+  const cds=[];let cdsz=0;
+  for(const e of es){
+    const cd=_cat([new Uint8Array([0x50,0x4B,0x01,0x02,0x14,0x00,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),_u32(e.crc),_u32(e.sz),_u32(e.sz),_u16(e.nb.length),_u16(0),_u16(0),_u16(0),_u16(0),_u32(0),_u32(e.off),e.nb]);
+    cds.push(cd);cdsz+=cd.length;
+  }
+  const eocd=_cat([new Uint8Array([0x50,0x4B,0x05,0x06,0x00,0x00,0x00,0x00]),_u16(es.length),_u16(es.length),_u32(cdsz),_u32(off),_u16(0)]);
+  return _cat([...es.map(e=>e.loc),...cds,eocd]);
+}
+const _ST='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="4"><font><sz val="13"/><name val="Calibri"/></font><font><sz val="13"/><b/><name val="Calibri"/></font><font><sz val="13"/><b/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><sz val="14"/><b/><color rgb="FF1A4A78"/><name val="Calibri"/></font></fonts><fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1A4A78"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEAF0F9"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFFFFF"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF2F6FC"/></patternFill></fill></fills><borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FF999999"/></left><right style="thin"><color rgb="FF999999"/></right><top style="thin"><color rgb="FF999999"/></top><bottom style="thin"><color rgb="FF999999"/></bottom><diagonal/></border><border><left style="medium"><color rgb="FF1A4A78"/></left><right style="medium"><color rgb="FF1A4A78"/></right><top style="medium"><color rgb="FF1A4A78"/></top><bottom style="medium"><color rgb="FF1A4A78"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="9"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="2" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="2" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+function _col(c){let s='';c++;while(c>0){s=String.fromCharCode(65+(c-1)%26)+s;c=Math.floor((c-1)/26);}return s;}
+function _esc(s){return String(s===null||s===undefined?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _ws(rows,cols,merges){
+  let x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols>';
+  cols.forEach((w,i)=>{x+='<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>';});
+  x+='</cols><sheetData>';
+  rows.forEach((row,ri)=>{
+    x+='<row r="'+(ri+1)+'" ht="'+(row.ht||39)+'" customHeight="1">';
+    row.cells.forEach((cell,ci)=>{
+      if(cell.skip)return;
+      const addr=_col(ci)+(ri+1);
+      const v=cell.v;
+      const isNum=typeof v==='number';
+      x+='<c r="'+addr+'" s="'+(cell.s||0)+'"'+(isNum?'':' t="str"')+'>'+( (v===null||v===undefined||v==='')? '' : '<v>'+_esc(v)+'</v>' )+'</c>';
+    });
+    x+='</row>';
+  });
+  x+='</sheetData>';
+  if(merges&&merges.length){x+='<mergeCells count="'+merges.length+'">';merges.forEach(m=>{x+='<mergeCell ref="'+_col(m.c1)+(m.r1+1)+':'+_col(m.c2)+(m.r2+1)+'"/>';});x+='</mergeCells>';}
+  x+='</worksheet>';return x;
+}
+// Multi-sheet download: sheets = [{name, rows, cols, merges}, ...]
+function _dlSheets(fn, sheets){
+  const CT_parts=sheets.map((s,i)=>'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('');
+  const CT='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+CT_parts+'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+  const RR='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  const WB_sheets=sheets.map((s,i)=>'<sheet name="'+_esc(s.name)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>').join('');
+  const WB='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+WB_sheets+'</sheets></workbook>';
+  const WR_rels=sheets.map((s,i)=>'<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join('');
+  const WR='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+WR_rels+'<Relationship Id="rId'+(sheets.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+  const files=[['[Content_Types].xml',CT],['_rels/.rels',RR],['xl/workbook.xml',WB],['xl/_rels/workbook.xml.rels',WR]];
+  sheets.forEach((s,i)=>files.push(['xl/worksheets/sheet'+(i+1)+'.xml',_ws(s.rows,s.cols,s.merges)]));
+  files.push(['xl/styles.xml',_ST]);
+  const zip=_zip(files);
+  const blob=new Blob([zip],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function _dl(fn,sn,rows,cols,merges){_dlSheets(fn,[{name:sn,rows,cols,merges}]);}
+// Style helpers: ds(rowIndex, 'center'|'left') -> style index for data rows
+window.XB={dl:_dl,dl2:_dlSheets,S:{TI:1,HC:2,HL:3,DC:4,DL:5,AC:6,AL:7,HN:8},ds:function(ri,al){const a=ri%2!==0;return a?(al==='left'?7:6):(al==='left'?5:4);}};
+})();
+
+</script>
+</body>
+</html>
