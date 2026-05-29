@@ -622,6 +622,7 @@ const ST_CLS={pending:'b-p',done:'b-d',deferred:'b-df',inprog:'b-prog'};
 let records=JSON.parse(localStorage.getItem('mhb7_r')||'[]');
 let purchases=JSON.parse(localStorage.getItem('mhb7_p')||'[]');
 let customMats=JSON.parse(localStorage.getItem('mhb7_cm')||'[]'); // Persistent custom consumables
+let customPartNames=JSON.parse(localStorage.getItem('mhb7_cpn')||'{}'); // {item: [partName,...]}
 let cState={};
 let preMats=[];  // [{name,lb,src,qty,noQty,hasFee,fee}]
 let fixId=null;
@@ -630,6 +631,16 @@ let sortMode='top-down';
 function save(){localStorage.setItem('mhb7_r',JSON.stringify(records));}
 function savePur(){localStorage.setItem('mhb7_p',JSON.stringify(purchases));}
 function saveCustomMats(){localStorage.setItem('mhb7_cm',JSON.stringify(customMats));}
+function saveCustomPartNames(){localStorage.setItem('mhb7_cpn',JSON.stringify(customPartNames));}
+function getPartNames(item){return[...(PART_NAMES[item]||PART_NAMES['default']||[]),...(customPartNames[item]||[])];}
+function addCustomPartName(item,name){
+  if(!name||!name.trim())return;
+  if(!customPartNames[item])customPartNames[item]=[];
+  if(!customPartNames[item].includes(name.trim())){
+    customPartNames[item].push(name.trim());
+    saveCustomPartNames();
+  }
+}
 
 function rebuildPrematSel(){
   const sel=document.getElementById('premat-sel');
@@ -906,9 +917,12 @@ function buildFxEntry(e,i){
       <select id="fxa-${i}" class="fx-sel" style="margin-bottom:0;" onchange="autoFix(${i})"><option>更換</option><option>調整</option><option>加裝</option><option>清除</option><option>協助</option></select>
       <input id="fxq-${i}" class="fx-inp" type="text" placeholder="數量 如：1個、2顆" value="${e.fixQty||''}" oninput="autoFix(${i})"/>
     </div>
-    <div style="position:relative;margin-bottom:7px;">
-      <input id="fxitem-${i}" class="fx-inp" type="text" value="${e.fixItem||e.item}" oninput="autoFix(${i})" placeholder="維修項目名稱（可選下方常用）" list="fxitem-list-${i}" style="width:100%;"/>
-      <datalist id="fxitem-list-${i}">${(PART_NAMES[e.item]||PART_NAMES['default']).map(p=>`<option value="${p}">`).join('')}</datalist>
+    <div style="display:flex;gap:7px;margin-bottom:7px;">
+      <select id="fxitem-${i}" class="fx-sel" style="flex:1;margin-bottom:0;" onchange="autoFix(${i})">
+        ${getPartNames(e.item).map(p=>'<option value="'+p+'"'+(( e.fixItem||e.item)===p?' selected':'')+'>'+p+'</option>').join('')}
+        <option value="__other__">── 其他（自訂）──</option>
+      </select>
+      <button class="btn-xs btn-ghost" onclick="addPartNamePrompt('${esc(e.item)}',${i})" style="flex:none;padding:8px 10px;white-space:nowrap;border:1.5px solid var(--bdr-md);border-radius:var(--rs);cursor:pointer;background:#fff;font-size:13px;">＋</button>
     </div>
     <select id="fxr-${i}" class="fx-sel" onchange="autoFix(${i})">
       <option>恢復正常</option><option>現場測試可正常使用</option><option>現場測試沒有異音</option>
@@ -948,13 +962,28 @@ function setFxSt(i,st){
 }
 function autoFix(i){
   const date=document.getElementById('fx-date').value.trim();
-  const act=document.getElementById(`fxa-${i}`).value;
-  const qty=document.getElementById(`fxq-${i}`).value.trim();
-  const item=document.getElementById(`fxitem-${i}`).value.trim();
-  const result=document.getElementById(`fxr-${i}`).value;
-  document.getElementById(`fxn-${i}`).value=(date||'')+act+(qty||'')+(item||'')+'後，'+result;
+  const act=document.getElementById('fxa-'+i).value;
+  const qty=document.getElementById('fxq-'+i).value.trim();
+  const rawItem=document.getElementById('fxitem-'+i).value;
+  const item=(rawItem==='__other__'?'':rawItem).trim();
+  const result=document.getElementById('fxr-'+i).value;
+  document.getElementById('fxn-'+i).value=(date||'')+act+(qty||'')+(item||'')+'後，'+result;
 }
 function autoFixAll(){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries.forEach((_,i)=>autoFix(i));}
+function addPartNamePrompt(item,i){
+  const name=prompt('新增維修項目名稱（將永久保存）：','');
+  if(!name||!name.trim())return;
+  addCustomPartName(item,name.trim());
+  // Rebuild select for this entry
+  const sel=document.getElementById('fxitem-'+i);
+  if(!sel)return;
+  const cur=sel.value;
+  const names=getPartNames(item);
+  sel.innerHTML=names.map(p=>'<option value="'+p+'"'+(cur===p?' selected':'')+'>'+p+'</option>').join('')+'<option value="__other__">── 其他（自訂）──</option>';
+  sel.value=name.trim();
+  autoFix(i);
+  toast('✅ 已新增「'+name.trim()+'」為固定選項');
+}
 function addMat(ei){
   const sel=document.getElementById(`fxmsel-${ei}`);
   const k=sel.value;if(!k)return;
@@ -965,7 +994,15 @@ function addMat(ei){
     const srcStr=prompt('來源（廠商提供/妙慧樓自備/住眾自費）：','廠商提供');
     const src={廠商提供:'vendor',妙慧樓自備:'self',住眾自費:'resident'}[srcStr]||'vendor';
     mObj={name,lb:name,src,noQty:false,hasFee:false,qty:''};
-    if(!customMats.find(m=>m.k===name)){customMats.push({k:name,lb:name,src,noQty:false,hasFee:false});saveCustomMats();}
+    if(!customMats.find(m=>m.k===name)){
+    customMats.push({k:name,lb:name,src,noQty:false,hasFee:false});
+    saveCustomMats();
+    // Rebuild all fxmsel custom optgroups in modal
+    document.querySelectorAll('[id^="fxmsel-custom-grp-"]').forEach(grp=>{
+      grp.innerHTML=customMats.map(m=>'<option value="'+m.k+'">'+m.lb+'</option>').join('');
+    });
+    toast('✅ 已新增「'+name+'」為固定耗材選項');
+  }
   }
   else{const def=MAT_OPTS.find(m=>m.k===k);if(!def)return;if(r.entries[ei].mats.find(m=>m.name===def.k)){toast('已加入');return;}mObj={name:def.k,lb:def.lb,src:def.src,noQty:def.noQty,hasFee:def.hasFee,defaultFee:def.defaultFee,qty:'',fee:def.defaultFee||''};}
   r.entries[ei].mats.push(mObj);
@@ -1158,13 +1195,13 @@ function exportAll(){
         const dri=dataRowIdx++;
         const dsc=ds(dri,'center'), dsl=ds(dri,'left');
         rows.push({ht:39,cells:[
-          {v:isFirst?ri+1:null,s:dsc},
-          {v:isFirst?(r.rdate||null):null,s:dsc},
-          {v:isFirst?vendor:null,s:dsc},
-          {v:isFirst?(r.fixDate||fxDate||null):null,s:dsc},
-          {v:isFirst?r.zone:null,s:dsc},
-          {v:isFirst?r.floor:null,s:dsc},
-          {v:isFirst?r.room:null,s:dsc},
+          {v:ri+1,s:dsc},
+          {v:r.rdate||null,s:dsc},
+          {v:vendor,s:dsc},
+          {v:r.fixDate||fxDate||null,s:dsc},
+          {v:r.zone,s:dsc},
+          {v:r.floor,s:dsc},
+          {v:r.room,s:dsc},
           {v:e.item,s:dsc},
           {v:e.content,s:dsl},
           {v:ST_LB[e.fixStatus||'pending'],s:dsc},
