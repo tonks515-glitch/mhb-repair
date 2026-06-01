@@ -711,6 +711,7 @@ let records=JSON.parse(localStorage.getItem('mhb7_r')||'[]');
 let purchases=JSON.parse(localStorage.getItem('mhb7_p')||'[]');
 let customMats=JSON.parse(localStorage.getItem('mhb7_cm')||'[]'); // Persistent custom consumables
 let customPartNames=JSON.parse(localStorage.getItem('mhb7_cpn')||'{}'); // {item: [partName,...]}
+let customChips=JSON.parse(localStorage.getItem('mhb7_cc')||'{}'); // {item: [chip,...]} persistent content chips
 let cState={};
 let preMats=[];  // [{name,lb,src,qty,noQty,hasFee,fee}]
 let fixId=null;
@@ -720,6 +721,19 @@ function save(){localStorage.setItem('mhb7_r',JSON.stringify(records));}
 function savePur(){localStorage.setItem('mhb7_p',JSON.stringify(purchases));}
 function saveCustomMats(){localStorage.setItem('mhb7_cm',JSON.stringify(customMats));}
 function saveCustomPartNames(){localStorage.setItem('mhb7_cpn',JSON.stringify(customPartNames));}
+function saveCustomChips(){localStorage.setItem('mhb7_cc',JSON.stringify(customChips));}
+function getChips(item){return[...(CMAP[item]||[item+'故障']),...(customChips[item]||[])];}
+function addCustomChip(item){
+  const name=prompt('新增報修內容選項（將永久保存）：','');
+  if(!name||!name.trim())return;
+  if(!customChips[item])customChips[item]=[];
+  if(!customChips[item].includes(name.trim())){
+    customChips[item].push(name.trim());
+    saveCustomChips();
+    toast('✅ 已新增「'+name.trim()+'」為固定選項');
+  }
+  rebuildContent();
+}
 function getPartNames(item){return[...(PART_NAMES[item]||PART_NAMES['default']||[]),...(customPartNames[item]||[])];}
 function addCustomPartName(item,name){
   if(!name||!name.trim())return;
@@ -805,11 +819,14 @@ function rebuildContent(){
   if(!show){cState={};return;}
   Object.keys(cState).forEach(k=>{if(!items.includes(k))delete cState[k];});
   document.getElementById('content-area').innerHTML=items.map((item,idx)=>{
-    const chips=CMAP[item]||[`${item}故障`];
+    const chips=getChips(item);
     const st=cState[item]||{};
     return`<div class="ci">
       <div class="ci-header"><span class="ci-badge">${item}</span><span class="ci-remove" onclick="deselItem('${esc(item)}')">×</span></div>
-      <div class="chips">${chips.map(c=>`<div class="chip${st.chip===c?' on':''}" onclick="pickChip('${esc(item)}','${esc(c)}')">${c}</div>`).join('')}</div>
+      <div class="chips">
+        ${buildChips(chips,st.chip,item)}
+        <div class="chip" onclick="addCustomChip('${esc(item)}')" style="border-style:dashed;color:var(--t3);">＋ 新增</div>
+      </div>
       <div class="ci-custom"><input class="fx-inp" type="text" placeholder="自訂描述（會覆蓋上方選擇）" value="${st.custom||''}" oninput="setCS('${esc(item)}','custom',this.value)"/></div>
       <div class="ci-fields">
         <input class="fx-inp qty" type="text" placeholder="數量 如 1、2" value="${st.qty||''}" oninput="setCS('${esc(item)}','qty',this.value)"/>
@@ -840,7 +857,8 @@ function addPremat(){
     if(!customMats.find(m=>m.k===name)){
       customMats.push({k:name,lb:name,src,noQty:false,hasFee:false});
       saveCustomMats();
-      rebuildPrematSel(); // Add to dropdown permanently
+      rebuildPrematSel();
+      toast('✅ 已新增「'+name+'」為固定耗材選項');
     }
   }
   const noQty=parts[2]==='noqty';
