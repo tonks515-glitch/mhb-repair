@@ -391,7 +391,7 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
         <div class="premat-title">📋 預計需要的耗材</div>
         <div id="premat-list"></div>
         <div style="display:flex;gap:7px;margin-top:8px;">
-          <select id="premat-sel" style="flex:1;font-size:13px;padding:8px 10px;">
+          <select id="premat-sel" style="flex:1;font-size:16px;padding:10px 10px;">
             <option value="">── 選擇耗材 ──</option>
             <optgroup label="妙慧樓自備">
               <option value="和成HCG馬桶水箱落水器|self">和成 HCG 馬桶水箱落水器</option>
@@ -811,6 +811,17 @@ function addManual(){
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━ CONTENT AREA ━━━━━━━━━━━━━━━━━━━━━━━━
+
+function buildChips(chips, selectedChip, item){
+  return chips.map(function(c){
+    var on = selectedChip===c?' on':'';
+    return '<div class="chip'+on+'" data-item="'+item.replace(/"/g,'&quot;')+'" data-chip="'+c.replace(/"/g,'&quot;')+'" onclick="pickChipEl(this)">'+c+'</div>';
+  }).join('');
+}
+function buildPartOptions(item){
+  const parts=PART_NAMES[item]||PART_NAMES['default']||[];
+  return parts.map(function(p){return '<option value="'+p+'">';}).join('');
+}
 function rebuildContent(){
   const items=getSelItems();
   const show=items.length>0;
@@ -837,6 +848,7 @@ function rebuildContent(){
 }
 function deselItem(item){const el=document.querySelector(`.ic[data-item="${CSS.escape(item)}"]`);if(el)el.classList.remove('on');delete cState[item];rebuildContent();}
 function pickChip(item,chip){if(!cState[item])cState[item]={};cState[item].chip=cState[item].chip===chip?'':chip;rebuildContent();}
+function pickChipEl(el){var item=el.dataset.item;var chip=el.dataset.chip;pickChip(item,chip);}
 function setCS(item,key,val){if(!cState[item])cState[item]={};cState[item][key]=val;}
 function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
