@@ -545,6 +545,94 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
   </div>
 </div>
 
+
+<!-- 編輯報修 Modal -->
+<div class="overlay" id="modal-edit">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-hd">
+      <div><div class="sh-title">編輯報修資料</div><div class="sh-loc" id="ed-loc"></div></div>
+      <span class="sh-close" onclick="closeEditModal()">×</span>
+    </div>
+    <div style="padding:14px 16px;">
+      <input type="hidden" id="ed-id"/>
+
+      <div class="f">
+        <label>區域</label>
+        <select id="ed-zone">
+          <option value="">選擇</option>
+          <option>有人住</option><option>空寮</option><option>公區</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="f">
+          <label>樓層</label>
+          <select id="ed-floor">
+            <option value="">選擇</option>
+            <option value="B1">B1</option><option value="一">一樓</option>
+            <option value="二">二樓</option><option value="三">三樓</option>
+            <option value="四">四樓</option><option value="五">五樓</option>
+            <option value="六">六樓</option><option value="頂樓">頂樓</option>
+          </select>
+        </div>
+        <div class="f">
+          <label>位置/房號</label>
+          <input type="text" id="ed-room"/>
+        </div>
+      </div>
+      <div class="f">
+        <label>報修日期</label>
+        <input type="date" id="ed-rdate"/>
+      </div>
+
+      <hr/>
+
+      <!-- 預計耗材 -->
+      <div class="f">
+        <label>預計耗材</label>
+        <div class="notice n-amber" style="margin-bottom:8px;">可在此新增或修改預計耗材項目及數量</div>
+        <div id="ed-premat-list"></div>
+        <div style="display:flex;gap:7px;margin-top:8px;">
+          <select id="ed-premat-sel" style="flex:1;font-size:16px;padding:10px 12px;border:1.5px solid var(--bdr-md);border-radius:var(--rs);-webkit-appearance:none;appearance:none;background:#fff url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%227%22%3E%3Cpath d=%22M1 1l5 5 5-5%22 stroke=%2296938e%22 stroke-width=%221.5%22 fill=%22none%22/%3E%3C/svg%3E') no-repeat right 11px center;padding-right:32px;">
+            <option value="">── 選擇耗材 ──</option>
+            <optgroup label="妙慧樓自備">
+              <option value="和成HCG馬桶水箱落水器|self">和成 HCG 馬桶水箱落水器</option>
+              <option value="浴室崁燈15W自然光4000k|self">浴室崁燈 15W 自然光 4000k</option>
+              <option value="走道燈15W暖白光3000k|self">走道燈 15W 暖白光 3000k</option>
+              <option value="防鳥刺|self|noqty">防鳥刺</option>
+            </optgroup>
+            <optgroup label="廠商提供">
+              <option value="12W暖黃光燈泡|vendor">12W 暖黃光燈泡</option>
+              <option value="10W暖黃光燈泡|vendor">10W 暖黃光燈泡</option>
+              <option value="5W崁燈|vendor">5W 崁燈</option>
+              <option value="三段式開關|vendor">三段式開關</option>
+              <option value="小夜燈|vendor">小夜燈</option>
+              <option value="冷氣遙控器|vendor">冷氣遙控器</option>
+              <option value="落水器|vendor">落水器（馬桶）</option>
+              <option value="浮球開關|vendor">浮球開關</option>
+              <option value="排水管|vendor">排水管</option>
+              <option value="風鼓的軸承|vendor">風鼓的軸承</option>
+              <option value="肥皂架|vendor">肥皂架</option>
+              <option value="水門|vendor">水門</option>
+            </optgroup>
+            <optgroup label="廠商代購，住眾自費">
+              <option value="馬桶水箱蓋|resident|fee:600">馬桶水箱蓋（600元）</option>
+              <option value="蓮蓬頭的水管|resident|fee:150">蓮蓬頭的水管（150元）</option>
+            </optgroup>
+            <option value="__custom__|vendor">＋ 其他（手動輸入）</option>
+          </select>
+          <button class="btn-xs btn-ghost" onclick="addEditPremat()" style="flex:none;padding:10px 13px;border:1.5px solid var(--bdr-md);border-radius:var(--rs);cursor:pointer;background:#fff;font-size:14px;font-weight:700;">＋</button>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn btn-ghost" onclick="closeEditModal()">取消</button>
+        <button class="btn btn-p" onclick="saveEdit()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <nav class="nav">
   <div class="nb on" onclick="goPage('add',this)"><svg viewBox="0 0 24 24"><path d="M9 12h6M9 16h6M9 8h6M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>登記</div>
   <div class="nb" onclick="goPage('list',this)"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/><circle cx="17" cy="18" r="3"/></svg>紀錄</div>
@@ -883,6 +971,7 @@ function renderList(){
       ${prematStr?`<div style="padding:7px 13px;font-size:12px;color:var(--amber);background:var(--amber-lt);border-top:1px solid var(--bdr);">📋 預計耗材：${prematStr}</div>`:''}
       <div class="rec-acts">
         <button class="btn btn-sm" style="background:var(--pri-lt);color:var(--pri);border:none;font-weight:700;" onclick="openFix(${r.id})">更新維修狀況</button>
+        <button class="btn btn-ghost btn-sm" onclick="openEdit(${r.id})">編輯報修</button>
         <button class="btn btn-ghost btn-sm" onclick="delRec(${r.id})">刪除</button>
       </div>
     </div>`;
@@ -1331,6 +1420,87 @@ function clearAll(){
   records=[];
   save();renderAll();toast(`✅ 已清除全部 ${cnt} 筆紀錄`);
 }
+
+// ── 編輯報修 ──────────────────────────────────────────────
+let editPreMats = [];
+
+function openEdit(id){
+  const r = records.find(r=>r.id===id);
+  if(!r) return;
+  document.getElementById('ed-id').value = id;
+  document.getElementById('ed-loc').textContent = r.floor+'F '+r.room+'（'+r.zone+'）';
+  document.getElementById('ed-zone').value = r.zone||'';
+  document.getElementById('ed-floor').value = r.floor||'';
+  document.getElementById('ed-room').value = r.room||'';
+  document.getElementById('ed-rdate').value = r.rdate||'';
+  editPreMats = r.preMats ? JSON.parse(JSON.stringify(r.preMats)) : [];
+  renderEditPrematList();
+  document.getElementById('modal-edit').classList.add('open');
+}
+
+function closeEditModal(){
+  document.getElementById('modal-edit').classList.remove('open');
+}
+
+function renderEditPrematList(){
+  const el = document.getElementById('ed-premat-list');
+  if(!editPreMats.length){
+    el.innerHTML = '<div class="mat-empty">尚無預計耗材</div>';
+    return;
+  }
+  el.innerHTML = '<div class="mat-list">'+editPreMats.map((m,i)=>`
+    <div class="mat-row">
+      <div class="mat-info">
+        <div class="mat-name">${m.lb||m.name}</div>
+        <span class="mat-src-badge ${SRC_CLS[m.src]||'msv'}">${SRC_LB[m.src]||m.src}</span>
+      </div>
+      ${m.noQty?'<span style="font-size:11px;color:var(--t3);">不計數量</span>':
+        `<div style="text-align:right;flex-shrink:0;">
+          <div class="mat-lbl">數量</div>
+          <input type="number" class="mat-qty-inp" min="1" value="${m.qty||''}" placeholder="數"
+            oninput="editPreMats[${i}].qty=this.value"/>
+        </div>`}
+      <span class="mat-del" onclick="editPreMats.splice(${i},1);renderEditPrematList()">×</span>
+    </div>`).join('')+'</div>';
+}
+
+function addEditPremat(){
+  const sel = document.getElementById('ed-premat-sel');
+  const v = sel.value;
+  if(!v) return;
+  const parts = v.split('|');
+  let name = parts[0], src = parts[1]||'vendor';
+  if(name==='__custom__'){
+    name = prompt('輸入耗材名稱：','');
+    if(!name||!name.trim()) return;
+    name = name.trim();
+    src = 'vendor';
+  }
+  const noQty = parts[2]==='noqty';
+  const feeMatch = (parts[2]||'').match(/fee:(\d+)/);
+  const hasFee = !!feeMatch;
+  const defaultFee = hasFee ? +feeMatch[1] : 0;
+  const def = [...MAT_OPTS,...customMats].find(m=>m.k===name);
+  const lb = def ? def.lb : name;
+  if(editPreMats.find(m=>m.name===name)){ toast('已加入'); return; }
+  editPreMats.push({name, lb, src, noQty, hasFee, fee:defaultFee, qty:''});
+  renderEditPrematList();
+  sel.value = '';
+}
+
+function saveEdit(){
+  const id = +document.getElementById('ed-id').value;
+  const r = records.find(r=>r.id===id);
+  if(!r) return;
+  r.zone = document.getElementById('ed-zone').value;
+  r.floor = document.getElementById('ed-floor').value;
+  r.room = document.getElementById('ed-room').value.trim();
+  r.rdate = document.getElementById('ed-rdate').value;
+  r.preMats = JSON.parse(JSON.stringify(editPreMats));
+  save(); renderAll(); closeEditModal();
+  toast('✅ 報修資料已更新');
+}
+
 function renderAll(){
   const pending=records.filter(r=>r.status==='pending').length;
   const badge=document.getElementById('pending-badge');
