@@ -320,6 +320,10 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
   .card-body{padding:11px 12px;}
   .fx-entries{padding:0 12px;}
 }
+
+#sync-status.syncing{color:rgba(255,255,255,0.8);}
+#sync-status.ok{color:#7dffb3;}
+#sync-status.err{color:#ffb3b3;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
@@ -329,7 +333,10 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
 <header class="hdr">
   <div class="hdr-inner">
     <div><div class="hdr-title">妙慧樓 水電報修</div><div class="hdr-sub">維修管理系統</div></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+    <div id="sync-status" style="font-size:11px;color:rgba(255,255,255,0.7);"></div>
     <div class="hdr-pill urgent" id="pending-badge">0 待維修</div>
+  </div>
   </div>
 </header>
 
@@ -449,7 +456,10 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
   </div>
   <div class="list-meta">
     <span class="list-ttl">維修紀錄</span>
-    <span class="count-pill" id="list-count">0</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="syncFromSheets()" style="background:var(--pri-lt);color:var(--pri);border:1px solid var(--pri-md);border-radius:var(--rs);padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;">↻ 同步</button>
+      <span class="count-pill" id="list-count">0</span>
+    </div>
   </div>
   <div id="list-body"></div>
 </div>
@@ -707,21 +717,100 @@ const FLOOR_ORDER=['頂樓','六','五','四','三','二','一','B1'];
 const ST_LB={pending:'待維修',done:'已完修',deferred:'待下次',inprog:'處理中'};
 const ST_CLS={pending:'b-p',done:'b-d',deferred:'b-df',inprog:'b-prog'};
 
+// ── Google Sheets 同步設定 ──
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbykZv6SiY0KQsgNWQtIUIW-LcdftReLf62OiSqxos3eCGha_enYPgSg2bFDa3qAxQQE/exec'; // 部署後填入 Apps Script 網址
+
 let records=JSON.parse(localStorage.getItem('mhb7_r')||'[]');
 let purchases=JSON.parse(localStorage.getItem('mhb7_p')||'[]');
-let customMats=JSON.parse(localStorage.getItem('mhb7_cm')||'[]'); // Persistent custom consumables
-let customPartNames=JSON.parse(localStorage.getItem('mhb7_cpn')||'{}'); // {item: [partName,...]}
-let customChips=JSON.parse(localStorage.getItem('mhb7_cc')||'{}'); // {item: [chip,...]} persistent content chips
+let customMats=JSON.parse(localStorage.getItem('mhb7_cm')||'[]');
+let customPartNames=JSON.parse(localStorage.getItem('mhb7_cpn')||'{}');
+let customChips=JSON.parse(localStorage.getItem('mhb7_cc')||'{}');
+let _syncing=false;
 let cState={};
 let preMats=[];  // [{name,lb,src,qty,noQty,hasFee,fee}]
 let fixId=null;
 let sortMode='top-down';
 
-function save(){localStorage.setItem('mhb7_r',JSON.stringify(records));}
-function savePur(){localStorage.setItem('mhb7_p',JSON.stringify(purchases));}
-function saveCustomMats(){localStorage.setItem('mhb7_cm',JSON.stringify(customMats));}
-function saveCustomPartNames(){localStorage.setItem('mhb7_cpn',JSON.stringify(customPartNames));}
-function saveCustomChips(){localStorage.setItem('mhb7_cc',JSON.stringify(customChips));}
+
+// ── Google Sheets 同步函數 ──
+function setSyncStatus(msg, cls){
+  const el=document.getElementById('sync-status');
+  if(!el)return;
+  el.textContent=msg; el.className=cls||'';
+}
+
+async function gasGet(action){
+  if(!GAS_URL||GAS_URL==='__GAS_URL__') return null;
+  try{
+    const res=await fetch(GAS_URL+'?action='+action,{method:'GET'});
+    return await res.json();
+  }catch(e){return null;}
+}
+
+async function gasPost(data){
+  if(!GAS_URL||GAS_URL==='__GAS_URL__') return null;
+  try{
+    const res=await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify(data)
+    });
+    return await res.json();
+  }catch(e){return null;}
+}
+
+async function syncFromSheets(){
+  if(!GAS_URL||GAS_URL==='__GAS_URL__') return;
+  setSyncStatus('同步中…','syncing');
+  try{
+    const [recs, customs] = await Promise.all([
+      gasGet('getAll'),
+      gasGet('getCustom')
+    ]);
+    if(recs && Array.isArray(recs)){
+      records=recs;
+      localStorage.setItem('mhb7_r',JSON.stringify(records));
+    }
+    if(customs){
+      if(customs.customMats){customMats=customs.customMats;localStorage.setItem('mhb7_cm',JSON.stringify(customMats));}
+      if(customs.customPartNames){customPartNames=customs.customPartNames;localStorage.setItem('mhb7_cpn',JSON.stringify(customPartNames));}
+      if(customs.customChips){customChips=customs.customChips;localStorage.setItem('mhb7_cc',JSON.stringify(customChips));}
+      if(customs.purchases){purchases=customs.purchases;localStorage.setItem('mhb7_p',JSON.stringify(purchases));}
+    }
+    setSyncStatus('已同步 ✓','ok');
+    renderAll();
+    setTimeout(()=>setSyncStatus('',''),3000);
+  }catch(e){
+    setSyncStatus('同步失敗','err');
+  }
+}
+
+async function pushRecord(rec){
+  localStorage.setItem('mhb7_r',JSON.stringify(records));
+  await gasPost({action:'saveRecord',record:rec});
+}
+
+async function pushDeleteRecord(id){
+  localStorage.setItem('mhb7_r',JSON.stringify(records));
+  await gasPost({action:'deleteRecord',id:id});
+}
+
+async function pushCustom(key,value){
+  await gasPost({action:'saveCustom',key:key,value:value});
+}
+
+// 手動觸發同步按鈕
+function manualSync(){
+  syncFromSheets();
+}
+
+function save(){
+  localStorage.setItem('mhb7_r',JSON.stringify(records));
+  // Sync to Sheets is triggered by calling pushRecord directly
+}
+function savePur(){localStorage.setItem('mhb7_p',JSON.stringify(purchases));pushCustom('purchases',purchases);}
+function saveCustomMats(){localStorage.setItem('mhb7_cm',JSON.stringify(customMats));pushCustom('customMats',customMats);}
+function saveCustomPartNames(){localStorage.setItem('mhb7_cpn',JSON.stringify(customPartNames));pushCustom('customPartNames',customPartNames);}
+function saveCustomChips(){localStorage.setItem('mhb7_cc',JSON.stringify(customChips));pushCustom('customChips',customChips);}
 function getChips(item){return[...(CMAP[item]||[item+'故障']),...(customChips[item]||[])];}
 function addCustomChip(item){
   const name=prompt('新增報修內容選項（將永久保存）：','');
@@ -775,6 +864,7 @@ function init(){
   document.getElementById('a-manual').addEventListener('keydown',e=>{if(e.key==='Enter'){addManual();e.preventDefault();}});
   rebuildPrematSel();
   renderAll();
+  syncFromSheets(); // 啟動時從 Sheets 同步
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━ ITEM GRID ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -916,8 +1006,10 @@ function submitRepair(){
   if(!rdate){toast('請填寫報修日期');return;}
   const entries=buildEntries();
   if(!entries.length){toast('請選擇報修項目');return;}
-  records.unshift({id:Date.now(),zone,floor,room,rdate,entries,status:'pending',preMats:JSON.parse(JSON.stringify(preMats))});
-  save();resetForm();renderAll();
+  const newRec={id:Date.now(),zone,floor,room,rdate,entries,status:'pending',preMats:JSON.parse(JSON.stringify(preMats))};
+  records.unshift(newRec);
+  save();pushRecord(newRec);
+  resetForm();renderAll();
   toast('✅ 報修紀錄已儲存');
   goPage('list',document.querySelectorAll('.nb')[1]);
 }
@@ -1155,7 +1247,7 @@ function saveFix(){
   });
   const sts=r.entries.map(e=>e.fixStatus||'pending');
   r.status=sts.every(s=>s==='done')?'done':sts.some(s=>s==='inprog')?'inprog':sts.some(s=>s==='deferred')?'deferred':'pending';
-  save();renderAll();closeModal();toast('✅ 維修狀況已更新');
+  save();pushRecord(records.find(r=>r.id===fixId));renderAll();closeModal();toast('✅ 維修狀況已更新');
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━ EXCEL EXPORT ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1529,7 +1621,7 @@ function saveEdit(){
   r.room = document.getElementById('ed-room').value.trim();
   r.rdate = document.getElementById('ed-rdate').value;
   r.preMats = JSON.parse(JSON.stringify(editPreMats));
-  save(); renderAll(); closeEditModal();
+  save(); pushRecord(records.find(r=>r.id===id)); renderAll(); closeEditModal();
   toast('✅ 報修資料已更新');
 }
 
