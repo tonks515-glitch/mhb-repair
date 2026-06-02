@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>妙慧樓 水電報修</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+
 // ═══════════════════════════════════════════════════════════════
 // XB — Pure JS XLSX Builder (bypasses SheetJS style limitations)
 // ═══════════════════════════════════════════════════════════════
@@ -72,6 +74,7 @@ function _dl(fn,sn,rows,cols,merges){_dlSheets(fn,[{name:sn,rows,cols,merges}]);
 // Style helpers: ds(rowIndex, 'center'|'left') -> style index for data rows
 window.XB={dl:_dl,dl2:_dlSheets,S:{TI:1,HC:2,HL:3,DC:4,DL:5,AC:6,AL:7,HN:8},ds:function(ri,al){const a=ri%2!==0;return a?(al==='left'?7:6):(al==='left'?5:4);}};
 })();
+
 
 </script>
 <style>
