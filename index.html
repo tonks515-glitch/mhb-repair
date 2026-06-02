@@ -741,32 +741,35 @@ function setSyncStatus(msg, cls){
 
 async function gasGet(action){
   if(!GAS_URL||GAS_URL==='__GAS_URL__') return null;
-  try{
-    // GAS requires no custom headers for CORS
-    const res=await fetch(GAS_URL+'?action='+action,{
-      method:'GET',
-      redirect:'follow'
-    });
-    const text=await res.text();
-    return JSON.parse(text);
-  }catch(e){
-    console.error('gasGet error:',e);
-    return null;
-  }
+  return new Promise((resolve)=>{
+    // Use JSONP to avoid CORS issues with GAS redirects
+    const cbName='_gasCb'+Date.now();
+    const script=document.createElement('script');
+    const timeout=setTimeout(()=>{
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve(null);
+    },15000);
+    window[cbName]=function(data){
+      clearTimeout(timeout);
+      delete window[cbName];
+      try{document.body.removeChild(script);}catch(e){}
+      resolve(data);
+    };
+    script.src=GAS_URL+'?action='+action+'&callback='+cbName;
+    document.body.appendChild(script);
+  });
 }
 
 async function gasPost(data){
   if(!GAS_URL||GAS_URL==='__GAS_URL__') return null;
   try{
-    // Send as text/plain — GAS accepts this without CORS preflight
     const res=await fetch(GAS_URL,{
       method:'POST',
-      redirect:'follow',
-      body:JSON.stringify(data),
-      headers:{'Content-Type':'text/plain'}
+      body:JSON.stringify(data)
     });
     const text=await res.text();
-    return JSON.parse(text);
+    try{return JSON.parse(text);}catch(e){return {ok:true};}
   }catch(e){
     console.error('gasPost error:',e);
     return null;
