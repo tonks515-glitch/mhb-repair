@@ -776,8 +776,10 @@ async function gasPost(data){
   }
 }
 
+let _syncLock=false;
 async function syncFromSheets(){
   if(!GAS_URL||GAS_URL==='__GAS_URL__') return;
+  if(_syncLock){toast('請稍候，正在處理中…');return;}
   setSyncStatus('同步中…','syncing');
   try{
     const [recs, customs] = await Promise.all([
@@ -804,13 +806,17 @@ async function syncFromSheets(){
 }
 
 async function pushRecord(rec){
+  _syncLock=true;
   localStorage.setItem('mhb7_r',JSON.stringify(records));
-  await gasPost({action:'saveRecord',record:rec});
+  try{ await gasPost({action:'saveRecord',record:rec}); }
+  finally{ _syncLock=false; }
 }
 
 async function pushDeleteRecord(id){
+  _syncLock=true;
   localStorage.setItem('mhb7_r',JSON.stringify(records));
-  await gasPost({action:'deleteRecord',id:id});
+  try{ await gasPost({action:'deleteRecord',id:id}); }
+  finally{ _syncLock=false; }
 }
 
 async function pushCustom(key,value){
@@ -1015,7 +1021,7 @@ function buildEntries(){
     return{item,content:desc+(qty?qty:'')+(loc?`(${loc})`:''),fixStatus:'pending',fixNote:'',fixAct:'更換',fixQty:'',fixItem:item,fixResult:'恢復正常',mats:[]};
   });
 }
-function submitRepair(){
+async function submitRepair(){
   const zone=document.getElementById('a-zone').value;
   const floor=document.getElementById('a-floor').value;
   const room=document.getElementById('a-room').value.trim();
@@ -1027,9 +1033,12 @@ function submitRepair(){
   if(!entries.length){toast('請選擇報修項目');return;}
   const newRec={id:Date.now(),zone,floor,room,rdate,entries,status:'pending',preMats:JSON.parse(JSON.stringify(preMats))};
   records.unshift(newRec);
-  save();pushRecord(newRec);
-  resetForm();renderAll();
+  save();resetForm();renderAll();
+  setSyncStatus('儲存中…','syncing');
+  await pushRecord(newRec);
+  setSyncStatus('已同步 ✓','ok');
   toast('✅ 報修紀錄已儲存');
+  setTimeout(()=>setSyncStatus('',''),3000);
   goPage('list',document.querySelectorAll('.nb')[1]);
 }
 function resetForm(){
@@ -1120,7 +1129,16 @@ function renderList(){
     </div>`;
   }).join('');
 }
-function delRec(id){if(!confirm('確定刪除？'))return;records=records.filter(r=>r.id!==id);save();renderAll();toast('已刪除');}
+async function delRec(id){
+  if(!confirm('確定刪除？'))return;
+  records=records.filter(r=>r.id!==id);
+  save();renderAll();toast('刪除中…');
+  setSyncStatus('刪除同步中…','syncing');
+  await pushDeleteRecord(id);
+  setSyncStatus('已同步 ✓','ok');
+  toast('✅ 已刪除');
+  setTimeout(()=>setSyncStatus('',''),3000);
+}
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━ STATUS MODAL ━━━━━━━━━━━━━━━━━━━━━━━━
 function openFix(id){
@@ -1244,7 +1262,7 @@ function addMat(ei){
 function rmMat(ei,mi){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries[ei].mats.splice(mi,1);document.getElementById(`fxmats-${ei}`).innerHTML=buildMatHtml(r.entries[ei].mats,ei);}
 function updMat(ei,mi,key,val){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries[ei].mats[mi][key]=val;}
 function closeModal(){document.getElementById('modal-fix').classList.remove('open');}
-function saveFix(){
+async function saveFix(){
   const r=records.find(r=>r.id===fixId);if(!r)return;
   r.fixDate=document.getElementById('fx-date').value;
   r.entries.forEach((e,i)=>{
@@ -1266,7 +1284,12 @@ function saveFix(){
   });
   const sts=r.entries.map(e=>e.fixStatus||'pending');
   r.status=sts.every(s=>s==='done')?'done':sts.some(s=>s==='inprog')?'inprog':sts.some(s=>s==='deferred')?'deferred':'pending';
-  save();pushRecord(records.find(r=>r.id===fixId));renderAll();closeModal();toast('✅ 維修狀況已更新');
+  save();renderAll();closeModal();
+  setSyncStatus('儲存中…','syncing');
+  await pushRecord(records.find(r=>r.id===fixId));
+  setSyncStatus('已同步 ✓','ok');
+  toast('✅ 維修狀況已更新');
+  setTimeout(()=>setSyncStatus('',''),3000);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━ EXCEL EXPORT ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1631,7 +1654,7 @@ function addEditPremat(){
   sel.value = '';
 }
 
-function saveEdit(){
+async function saveEdit(){
   const id = +document.getElementById('ed-id').value;
   const r = records.find(r=>r.id===id);
   if(!r) return;
@@ -1640,8 +1663,12 @@ function saveEdit(){
   r.room = document.getElementById('ed-room').value.trim();
   r.rdate = document.getElementById('ed-rdate').value;
   r.preMats = JSON.parse(JSON.stringify(editPreMats));
-  save(); pushRecord(records.find(r=>r.id===id)); renderAll(); closeEditModal();
+  save(); renderAll(); closeEditModal();
+  setSyncStatus('儲存中…','syncing');
+  await pushRecord(records.find(r=>r.id===id));
+  setSyncStatus('已同步 ✓','ok');
   toast('✅ 報修資料已更新');
+  setTimeout(()=>setSyncStatus('',''),3000);
 }
 
 function renderAll(){
