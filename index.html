@@ -254,17 +254,17 @@ textarea{resize:vertical;min-height:64px;line-height:1.55;}
 .mat-section{margin-top:10px;}
 .mat-section>label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:7px;}
 .mat-list{border:1px solid var(--bdr);border-radius:var(--rs);overflow:hidden;margin-bottom:8px;}
-.mat-row{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--bdr);background:#fff;}
+.mat-row{display:flex;align-items:flex-start;gap:6px;padding:8px 11px;border-bottom:1px solid var(--bdr);background:#fff;flex-wrap:nowrap;}
 .mat-row:last-child{border-bottom:none;}
-.mat-info{flex:1;min-width:0;}
-.mat-name{font-size:13px;font-weight:600;color:var(--t1);}
+.mat-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden;}
+.mat-name{font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mat-src-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:2px;}
 .mss{background:var(--pri-lt);color:var(--pri);}
 .msv{background:var(--amber-lt);color:var(--amber);}
 .msr{background:var(--pur-lt);color:var(--pur);}
-.mat-qty-inp,.mat-fee-inp{padding:8px 7px;border:1.5px solid var(--bdr-md);border-radius:var(--rss);font-size:16px;font-family:inherit;text-align:center;outline:none;min-height:44px;}
-.mat-qty-inp{width:56px;}
-.mat-fee-inp{width:72px;}
+.mat-qty-inp,.mat-fee-inp{padding:6px 4px;border:1.5px solid var(--bdr-md);border-radius:var(--rss);font-size:15px;font-family:inherit;text-align:center;outline:none;min-height:40px;width:56px;}
+.mat-qty-inp{width:52px;}
+.mat-fee-inp{width:64px;}
 .mat-lbl{font-size:11px;color:var(--t3);margin-bottom:2px;text-align:right;}
 .mat-del{color:var(--t3);font-size:20px;cursor:pointer;flex-shrink:0;padding:2px 4px;border-radius:4px;}
 .mat-del:hover{color:var(--red);background:var(--red-lt);}
@@ -1167,7 +1167,7 @@ function buildFxEntry(e,i){
       <div class="st-btn ${spg}" id="fspg-${i}" onclick="setFxSt(${i},'inprog')">🔄 處理中</div>
     </div>
     <div class="compose-grid">
-      <select id="fxa-${i}" class="fx-sel" style="margin-bottom:0;" onchange="autoFix(${i})"><option>更換</option><option>調整</option><option>加裝</option><option>清除</option><option>協助</option></select>
+      <select id="fxa-${i}" class="fx-sel" style="margin-bottom:0;" onchange="autoFix(${i})"><option>更換</option><option>調整</option><option>加裝</option><option>補充</option><option>清除</option><option>協助</option></select>
       <input id="fxq-${i}" class="fx-inp" type="text" placeholder="數量 如：1個、2顆" value="${e.fixQty||''}" oninput="autoFix(${i})"/>
     </div>
     <div style="display:flex;gap:7px;margin-bottom:7px;">
@@ -1201,13 +1201,13 @@ function buildFxEntry(e,i){
 }
 function buildMatHtml(mats,ei){
   if(!mats.length)return'<div class="mat-empty">無耗材</div>';
-  return`<div class="mat-list">${mats.map((m,mi)=>`
-    <div class="mat-row">
-      <div class="mat-info"><div class="mat-name">${m.lb||m.name}</div><span class="mat-src-badge ${SRC_CLS[m.src]||'msv'}">${SRC_LB[m.src]||m.src}</span></div>
-      ${m.hasFee?`<div style="text-align:right;flex-shrink:0;"><div class="mat-lbl">金額(元)</div><input type="number" class="mat-fee-inp" id="mat-fee-${ei}-${mi}" value="${m.fee||m.defaultFee||''}" oninput="updMat(${ei},${mi},'fee',this.value)"/></div>`:''}
-      ${m.noQty?'<span style="font-size:11px;color:var(--t3);flex-shrink:0;">不計數量</span>':`<div style="text-align:right;flex-shrink:0;"><div class="mat-lbl">數量</div><input type="number" class="mat-qty-inp" id="mat-qty-${ei}-${mi}" min="1" value="${m.qty||''}" oninput="updMat(${ei},${mi},'qty',this.value)"/></div>`}
-      <span class="mat-del" onclick="rmMat(${ei},${mi})">×</span>
-    </div>`).join('')}</div>`;
+  return'<div class="mat-list">'+mats.map(function(m,mi){
+    var feeInp='<div style="flex-shrink:0;text-align:center;"><div class="mat-lbl">金額(元)</div><input type="number" class="mat-fee-inp" value="'+(m.fee||m.defaultFee||'')+'" oninput="updMat('+ei+','+mi+',&quot;fee&quot;,this.value)"/></div>';
+    var fee=m.hasFee?feeInp:'';
+    var qtyInp='<div style="flex-shrink:0;text-align:center;"><div class="mat-lbl">數量</div><input type="number" class="mat-qty-inp" min="1" value="'+(m.qty||'')+'" oninput="updMat('+ei+','+mi+',&quot;qty&quot;,this.value)"/></div>';
+    var qty=m.noQty?'<span style="font-size:11px;color:var(--t3);flex-shrink:0;white-space:nowrap;">不計數量</span>':qtyInp;
+    return '<div class="mat-row"><div class="mat-info"><div class="mat-name">'+(m.lb||m.name)+'</div><span class="mat-src-badge '+(SRC_CLS[m.src]||'msv')+'">'+(SRC_LB[m.src]||m.src)+'</span></div>'+fee+qty+'<span class="mat-del" onclick="rmMat('+ei+','+mi+')">×</span></div>';
+  }).join('')+'</div>';
 }
 function setFxSt(i,st){
   const r=records.find(r=>r.id===fixId);if(r)r.entries[i].fixStatus=st;
@@ -1263,7 +1263,7 @@ function addMat(ei){
   sel.value='';
 }
 function rmMat(ei,mi){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries[ei].mats.splice(mi,1);document.getElementById(`fxmats-${ei}`).innerHTML=buildMatHtml(r.entries[ei].mats,ei);}
-function updMat(ei,mi,key,val){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries[ei].mats[mi][key]=val;}
+function updMat(ei,mi,key,val){const r=records.find(r=>r.id===fixId);if(!r)return;const k=String(key).replace(/&quot;/g,'"');r.entries[ei].mats[mi][k]=val;}
 function closeModal(){document.getElementById('modal-fix').classList.remove('open');}
 async function saveFix(){
   const r=records.find(r=>r.id===fixId);if(!r)return;
@@ -1274,16 +1274,7 @@ async function saveFix(){
     e.fixItem=document.getElementById(`fxitem-${i}`).value;
     e.fixResult=document.getElementById(`fxr-${i}`).value;
     e.fixNote=document.getElementById(`fxn-${i}`).value;
-    // Re-read ALL mat qty/fee values from DOM inputs before saving
-    (e.mats||[]).forEach((m,mi)=>{
-      const qEl=document.querySelector(`#fxmats-${i} .mat-qty-inp:nth-of-type(${mi+1})`);
-      const fEl=document.querySelector(`#fxmats-${i} .mat-fee-inp:nth-of-type(${mi+1})`);
-      // More reliable: read by data attribute
-      const matEl=document.getElementById(`mat-qty-${i}-${mi}`);
-      const feeEl=document.getElementById(`mat-fee-${i}-${mi}`);
-      if(matEl) m.qty=matEl.value;
-      if(feeEl) m.fee=feeEl.value;
-    });
+    // mats already updated via oninput → updMat()
   });
   const sts=r.entries.map(e=>e.fixStatus||'pending');
   r.status=sts.every(s=>s==='done')?'done':sts.some(s=>s==='inprog')?'inprog':sts.some(s=>s==='deferred')?'deferred':'pending';
@@ -1398,7 +1389,7 @@ function exportReport(){
         const dsc=ds(ri,'center'), dsl=ds(ri,'left');
         rows.push({ht:39,cells:[
           {v:isFirst?seq:null,s:dsc},
-          {v:isFirst?(r.rdate||null):null,s:dsc},
+          {v:isFirst?(r.rdate?normDate(r.rdate):null):null,s:dsc},
           {v:isEFirst?e.item:null,s:dsc},
           {v:isFirst?r.zone:null,s:dsc},
           {v:isFirst?r.floor:null,s:dsc},
@@ -1417,6 +1408,23 @@ function exportReport(){
   const cols=[6,13,14,8,6,14,30,26,12,12];
   XB.dl(year+'年'+month+'月_妙慧樓報修單.xlsx',month+'月維修-已完成',rows,cols,merges);
   toast('✅ 報修單已下載');
+}
+
+
+// Normalize date string — strips any JS Date toString garbage
+function normDate(v){
+  if(!v) return '';
+  var s=String(v);
+  // Already simple format like "6/3", "2026-05-26", "5/26" — keep as is
+  if(/^\d{1,4}[\/\-]\d{1,2}([\/\-]\d{1,4})?$/.test(s.trim())) return s.trim();
+  // JS Date toString: "Wed Jun 03 2026 00:00:00 GMT+0800..."
+  try{
+    var d=new Date(s);
+    if(!isNaN(d.getTime())){
+      return (d.getMonth()+1)+'/'+(d.getDate());
+    }
+  }catch(e){}
+  return s;
 }
 
 function exportAll(){
@@ -1454,9 +1462,9 @@ function exportAll(){
         const dsc=ds(dri,'center'), dsl=ds(dri,'left');
         rows.push({ht:39,cells:[
           {v:ri+1,s:dsc},
-          {v:r.rdate||null,s:dsc},
+          {v:r.rdate?normDate(r.rdate):null,s:dsc},
           {v:vendor,s:dsc},
-          {v:r.fixDate||fxDate||null,s:dsc},
+          {v:r.fixDate?normDate(r.fixDate):(fxDate?normDate(fxDate):null),s:dsc},
           {v:r.zone,s:dsc},
           {v:r.floor,s:dsc},
           {v:r.room,s:dsc},
@@ -1624,7 +1632,7 @@ function renderEditPrematList(){
         <span class="mat-src-badge ${SRC_CLS[m.src]||'msv'}">${SRC_LB[m.src]||m.src}</span>
       </div>
       ${m.noQty?'<span style="font-size:11px;color:var(--t3);">不計數量</span>':
-        `<div style="text-align:right;flex-shrink:0;">
+        `<div style="text-align:right;flex-shrink:0;min-width:0;">
           <div class="mat-lbl">數量</div>
           <input type="number" class="mat-qty-inp" min="1" value="${m.qty||''}" placeholder="數"
             oninput="editPreMats[${i}].qty=this.value"/>
