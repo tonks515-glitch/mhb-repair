@@ -454,7 +454,7 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
       <span style="font-size:11px;font-weight:700;color:var(--t3);align-self:center;">排序：</span>
       <div class="sort-btn on" id="sort-top" onclick="setSort('top-down',this)">⬇ 從高樓層往下</div>
       <div class="sort-btn" id="sort-bot" onclick="setSort('bot-up',this)">⬆ 從低樓層往上</div>
-      <div class="sort-btn" id="sort-date" onclick="setSort('date',this)">📅 報修日期</div>
+      <div class="sort-btn" id="sort-res" onclick="setSort('resident',this)">🏠 有人住</div>
     </div>
   </div>
   <div class="list-meta">
@@ -812,8 +812,17 @@ async function syncFromSheets(){
 async function pushRecord(rec){
   _syncLock=true;
   localStorage.setItem('mhb7_r',JSON.stringify(records));
-  try{ await gasPost({action:'saveRecord',record:rec}); }
-  finally{ _syncLock=false; }
+  try{
+    let res=await gasPost({action:'saveRecord',record:rec});
+    if(!res||res.error){
+      // Retry once
+      await new Promise(r=>setTimeout(r,1500));
+      res=await gasPost({action:'saveRecord',record:rec});
+    }
+    if(res&&res.ok) return true;
+  }catch(e){console.error('pushRecord error:',e);}
+  finally{_syncLock=false;}
+  return false;
 }
 
 async function pushDeleteRecord(id){
@@ -1072,10 +1081,10 @@ function roomNum(room){
 }
 
 function sortedRecords(list){
-  if(sortMode==='date'){
-    return [...list].sort((a,b)=>(b.rdate||'').localeCompare(a.rdate||''));
+  // 有人住模式：只顯示有人住，房號從小到大
+  if(sortMode==='resident'){
+    return list.filter(r=>r.zone==='有人住').sort((a,b)=>roomNum(a.room)-roomNum(b.room));
   }
-  // Snake sort: floor order + alternating room direction
   const floorList=sortMode==='top-down'?[...FLOOR_ORDER]:([...FLOOR_ORDER].reverse());
   // Group by floor
   const byFloor={};
@@ -1087,7 +1096,6 @@ function sortedRecords(list){
   const result=[];
   floorList.forEach((f,fi)=>{
     if(!byFloor[f])return;
-    // Alternating: even index (0,2,4…) = descending room, odd = ascending
     const asc=fi%2!==0;
     const sorted=[...byFloor[f]].sort((a,b)=>asc?roomNum(a.room)-roomNum(b.room):roomNum(b.room)-roomNum(a.room));
     result.push(...sorted);
