@@ -806,6 +806,9 @@ async function syncFromSheets(){
       if(customs.purchases){purchases=customs.purchases;localStorage.setItem('mhb7_p',JSON.stringify(purchases));}
     }
     setSyncStatus('已同步 ✓','ok');
+    // 同步後重設篩選為「全部」，避免誤以為資料不見
+    const stEl=document.getElementById('s-st');
+    if(stEl) stEl.value='';
     renderAll();
     setTimeout(()=>setSyncStatus('',''),3000);
   }catch(e){
