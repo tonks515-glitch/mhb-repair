@@ -1631,19 +1631,29 @@ function exportMat(){
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━ UTILS ━━━━━━━━━━━━━━━━━━━━━━━━
-function clearDone(){
+async function clearDone(){
   const cnt=records.filter(r=>r.status==='done').length;
   if(!cnt){toast('沒有已完修的紀錄');return;}
   if(!confirm(`確定清除 ${cnt} 筆已完修的紀錄？\n建議先匯出備份。`))return;
   records=records.filter(r=>r.status!=='done');
-  save();renderAll();toast(`✅ 已清除 ${cnt} 筆已完修紀錄`);
+  save();renderAll();
+  setSyncStatus('同步中…','syncing');
+  await gasPost({action:'saveAllRecords',records:records});
+  setSyncStatus('已同步 ✓','ok');
+  setTimeout(()=>setSyncStatus('',''),3000);
+  toast(`✅ 已清除 ${cnt} 筆已完修紀錄`);
 }
-function clearAll(){
+async function clearAll(){
   if(!records.length){toast('沒有紀錄');return;}
   if(!confirm(`確定清除全部 ${records.length} 筆紀錄？\n此操作無法還原，建議先匯出備份。`))return;
   const cnt=records.length;
   records=[];
-  save();renderAll();toast(`✅ 已清除全部 ${cnt} 筆紀錄`);
+  save();renderAll();
+  setSyncStatus('同步中…','syncing');
+  await gasPost({action:'saveAllRecords',records:records});
+  setSyncStatus('已同步 ✓','ok');
+  setTimeout(()=>setSyncStatus('',''),3000);
+  toast(`✅ 已清除全部 ${cnt} 筆紀錄`);
 }
 
 // ── 編輯報修 ──────────────────────────────────────────────
