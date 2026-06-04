@@ -1507,10 +1507,32 @@ function exportAll(){
     matRows.push({ht:39,cells:[{v:'尚無耗材紀錄',s:ds(0,'left')},{v:'',s:ds(0,'center')},{v:'',s:ds(0,'center')},{v:'',s:ds(0,'center')}]});
   }
 
+  // ── Sheet 3: 本月廠商採購耗材 ──
+  const purRows=[];
+  purRows.push({ht:32,cells:[
+    {v:year+'年'+month+'月 廠商採購耗材',s:S.TI},
+    {v:'',s:S.TI},{v:'',s:S.TI}
+  ]});
+  purRows.push({ht:39,cells:[
+    {v:'採購項目',s:S.HL},{v:'數量',s:S.HC},{v:'單位',s:S.HC}
+  ]});
+  if(purchases.length){
+    purchases.forEach((p,i)=>{
+      purRows.push({ht:39,cells:[
+        {v:p.name||'',s:ds(i,'left')},
+        {v:p.qty?+p.qty:null,s:ds(i,'center')},
+        {v:p.unit||'',s:ds(i,'center')}
+      ]});
+    });
+  }else{
+    purRows.push({ht:39,cells:[{v:'尚無採購紀錄',s:ds(0,'left')},{v:'',s:ds(0,'center')},{v:'',s:ds(0,'center')}]});
+  }
+
   const sheet1={name:month+'月維修完整紀錄',rows,cols:[6,13,8,12,8,6,14,14,28,8,28,24,12,12],merges:[{r1:0,c1:0,r2:0,c2:13}]};
-  const sheet2={name:month+'月耗材數量',rows:matRows,cols:[32,12,12,12],merges:[{r1:0,c1:0,r2:0,c2:3}]};
-  XB.dl2(year+'年'+month+'月_妙慧樓完整紀錄.xlsx',[sheet1,sheet2]);
-  toast('✅ 完整紀錄（含耗材頁籤）已下載');
+  const sheet2={name:month+'月實際使用耗材',rows:matRows,cols:[32,12,12,12],merges:[{r1:0,c1:0,r2:0,c2:3}]};
+  const sheet3={name:month+'月廠商採購耗材',rows:purRows,cols:[36,12,10],merges:[{r1:0,c1:0,r2:0,c2:2}]};
+  XB.dl2(year+'年'+month+'月_妙慧樓完整紀錄.xlsx',[sheet1,sheet2,sheet3]);
+  toast('✅ 完整紀錄（含耗材及採購頁籤）已下載');
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━ REPORT LIST ━━━━━━━━━━━━━━━━━━━━━━━━
