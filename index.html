@@ -1465,8 +1465,17 @@ function exportAll(){
     {v:'耗材項目',s:S.HL},{v:'耗材數量(廠商提供)',s:S.HC},{v:'耗材數量(妙慧樓自備)',s:S.HC}
   ]});
 
+  // 匯出排序：樓層從低到高，同樓層房號從小到大
+  const FLOOR_ASC=['B1','一','二','三','四','五','六','頂樓'];
+  const exportRecords=[...records].sort((a,b)=>{
+    const fa=FLOOR_ASC.indexOf(a.floor);
+    const fb=FLOOR_ASC.indexOf(b.floor);
+    if(fa!==fb) return (fa===-1?999:fa)-(fb===-1?999:fb);
+    return roomNum(a.room)-roomNum(b.room);
+  });
+
   let dataRowIdx=0;
-  records.forEach((r,ri)=>{
+  exportRecords.forEach((r,ri)=>{
     r.entries.forEach((e,ei)=>{
       const mats=(e.mats&&e.mats.length)?e.mats:[null];
       mats.forEach((m,mi)=>{
