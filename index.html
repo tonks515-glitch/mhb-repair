@@ -781,9 +781,14 @@ async function gasPost(data){
 }
 
 let _syncLock=false;
+// Auto-release sync lock after 10 seconds in case of network failure
+function _setSyncLock(val){
+  _syncLock=val;
+  if(val) setTimeout(()=>{_syncLock=false;},10000);
+}
 async function syncFromSheets(){
   if(!GAS_URL||GAS_URL==='__GAS_URL__') return;
-  if(_syncLock){toast('請稍候，正在處理中…');return;}
+  if(_syncLock){setSyncStatus('等待中…','syncing');await new Promise(r=>setTimeout(r,2000));_syncLock=false;}
   setSyncStatus('同步中…','syncing');
   try{
     const [recs, customs] = await Promise.all([
@@ -810,7 +815,7 @@ async function syncFromSheets(){
 }
 
 async function pushRecord(rec){
-  _syncLock=true;
+  _setSyncLock(true);
   localStorage.setItem('mhb7_r',JSON.stringify(records));
   try{
     let res=await gasPost({action:'saveRecord',record:rec});
@@ -821,15 +826,15 @@ async function pushRecord(rec){
     }
     if(res&&res.ok) return true;
   }catch(e){console.error('pushRecord error:',e);}
-  finally{_syncLock=false;}
+  finally{_setSyncLock(false);}
   return false;
 }
 
 async function pushDeleteRecord(id){
-  _syncLock=true;
+  _setSyncLock(true);
   localStorage.setItem('mhb7_r',JSON.stringify(records));
   try{ await gasPost({action:'deleteRecord',id:id}); }
-  finally{ _syncLock=false; }
+  finally{ _setSyncLock(false); }
 }
 
 async function pushCustom(key,value){
