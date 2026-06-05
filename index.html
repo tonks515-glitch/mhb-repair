@@ -474,7 +474,7 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
     <div class="card-body">
       <div class="row2">
         <div class="f"><label>廠商</label><input type="text" id="rp-vendor" value="快陞"/></div>
-        <div class="f"><label>年月（如 2026, 5）</label><input type="text" id="rp-ym" oninput="localStorage.setItem('mhb7_ym',this.value)"/></div>
+        <div class="f"><label>年月（如 2026, 5）</label><input type="text" id="rp-ym" oninput="localStorage.setItem('mhb7_ym',this.value);pushCustom('reportYm',this.value);"/></div>
       </div>
       <div class="row2">
         <div class="f"><label>報修日期</label><input type="text" id="rp-date" placeholder="2026.04.29"/><div class="field-hint">整批報修給廠商的日期</div></div>
@@ -804,6 +804,11 @@ async function syncFromSheets(){
       if(customs.customPartNames){customPartNames=customs.customPartNames;localStorage.setItem('mhb7_cpn',JSON.stringify(customPartNames));}
       if(customs.customChips){customChips=customs.customChips;localStorage.setItem('mhb7_cc',JSON.stringify(customChips));}
       if(customs.purchases){purchases=customs.purchases;localStorage.setItem('mhb7_p',JSON.stringify(purchases));}
+      if(customs.reportYm){
+        localStorage.setItem('mhb7_ym',customs.reportYm);
+        const ymEl=document.getElementById('rp-ym');
+        if(ymEl&&ymEl.value!==customs.reportYm) ymEl.value=customs.reportYm;
+      }
     }
     setSyncStatus('已同步 ✓','ok');
     // 同步後重設篩選為「全部」，避免誤以為資料不見
@@ -1672,6 +1677,7 @@ async function clearAll(){
     m++;if(m>12){m=1;y++;}
     ymEl.value=y+', '+m;
     localStorage.setItem('mhb7_ym',ymEl.value);
+    pushCustom('reportYm',ymEl.value);
   }
   setSyncStatus('Sheets 同步中…','syncing');
   let ok=true;
