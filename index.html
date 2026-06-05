@@ -1635,25 +1635,47 @@ async function clearDone(){
   const cnt=records.filter(r=>r.status==='done').length;
   if(!cnt){toast('沒有已完修的紀錄');return;}
   if(!confirm(`確定清除 ${cnt} 筆已完修的紀錄？\n建議先匯出備份。`))return;
+  // 先取得要刪除的 id 清單
+  const toDelete=records.filter(r=>r.status==='done').map(r=>r.id);
   records=records.filter(r=>r.status!=='done');
   save();renderAll();
-  setSyncStatus('同步中…','syncing');
-  await gasPost({action:'saveAllRecords',records:records});
-  setSyncStatus('已同步 ✓','ok');
-  setTimeout(()=>setSyncStatus('',''),3000);
-  toast(`✅ 已清除 ${cnt} 筆已完修紀錄`);
+  setSyncStatus('Sheets 同步中…','syncing');
+  // 逐筆刪除，比批次覆寫更可靠
+  let ok=true;
+  for(const id of toDelete){
+    const res=await gasPost({action:'deleteRecord',id:id});
+    if(!res){ok=false;}
+  }
+  if(ok){
+    setSyncStatus('已同步 ✓','ok');
+    toast('✅ 已清除 '+cnt+' 筆已完修紀錄');
+  }else{
+    setSyncStatus('部分同步失敗','err');
+    toast('⚠️ 本機已清除，但部分 Sheets 同步失敗，請再按同步');
+  }
+  setTimeout(()=>setSyncStatus('',''),4000);
 }
 async function clearAll(){
   if(!records.length){toast('沒有紀錄');return;}
   if(!confirm(`確定清除全部 ${records.length} 筆紀錄？\n此操作無法還原，建議先匯出備份。`))return;
   const cnt=records.length;
+  const toDelete=records.map(r=>r.id);
   records=[];
   save();renderAll();
-  setSyncStatus('同步中…','syncing');
-  await gasPost({action:'saveAllRecords',records:records});
-  setSyncStatus('已同步 ✓','ok');
-  setTimeout(()=>setSyncStatus('',''),3000);
-  toast(`✅ 已清除全部 ${cnt} 筆紀錄`);
+  setSyncStatus('Sheets 同步中…','syncing');
+  let ok=true;
+  for(const id of toDelete){
+    const res=await gasPost({action:'deleteRecord',id:id});
+    if(!res){ok=false;}
+  }
+  if(ok){
+    setSyncStatus('已同步 ✓','ok');
+    toast('✅ 已清除全部 '+cnt+' 筆紀錄');
+  }else{
+    setSyncStatus('部分同步失敗','err');
+    toast('⚠️ 本機已清除，但部分 Sheets 同步失敗，請再按同步');
+  }
+  setTimeout(()=>setSyncStatus('',''),4000);
 }
 
 // ── 編輯報修 ──────────────────────────────────────────────
