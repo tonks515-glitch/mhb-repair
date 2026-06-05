@@ -474,7 +474,7 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
     <div class="card-body">
       <div class="row2">
         <div class="f"><label>廠商</label><input type="text" id="rp-vendor" value="快陞"/></div>
-        <div class="f"><label>年月（如 2026, 5）</label><input type="text" id="rp-ym"/></div>
+        <div class="f"><label>年月（如 2026, 5）</label><input type="text" id="rp-ym" oninput="localStorage.setItem('mhb7_ym',this.value)"/></div>
       </div>
       <div class="row2">
         <div class="f"><label>報修日期</label><input type="text" id="rp-date" placeholder="2026.04.29"/><div class="field-hint">整批報修給廠商的日期</div></div>
@@ -905,7 +905,8 @@ function today(){return new Date().toISOString().split('T')[0];}
 function init(){
   document.getElementById('a-rdate').value=today();
   const now=new Date();
-  document.getElementById('rp-ym').value=`${now.getFullYear()}, ${now.getMonth()+1}`;
+  const savedYm=localStorage.getItem('mhb7_ym');
+  document.getElementById('rp-ym').value=savedYm||`${now.getFullYear()}, ${now.getMonth()+1}`;
   buildItemGrid(ITEMS);
   document.getElementById('a-manual').addEventListener('keydown',e=>{if(e.key==='Enter'){addManual();e.preventDefault();}});
   rebuildPrematSel();
@@ -1663,6 +1664,15 @@ async function clearAll(){
   const toDelete=records.map(r=>r.id);
   records=[];
   save();renderAll();
+  // 自動更新年月為下一個月
+  const ymEl=document.getElementById('rp-ym');
+  if(ymEl){
+    const parts=ymEl.value.split(',').map(s=>s.trim());
+    let y=+parts[0],m=+parts[1];
+    m++;if(m>12){m=1;y++;}
+    ymEl.value=y+', '+m;
+    localStorage.setItem('mhb7_ym',ymEl.value);
+  }
   setSyncStatus('Sheets 同步中…','syncing');
   let ok=true;
   for(const id of toDelete){
