@@ -788,7 +788,7 @@ function _setSyncLock(val){
 }
 async function syncFromSheets(){
   if(!GAS_URL||GAS_URL==='__GAS_URL__') return;
-  if(_syncLock){setSyncStatus('等待中…','syncing');await new Promise(r=>setTimeout(r,2000));_syncLock=false;}
+  if(_syncLock){setSyncStatus('','');return;} // 寫入進行中，不同步避免覆蓋
   setSyncStatus('同步中…','syncing');
   try{
     const [recs, customs] = await Promise.all([
@@ -910,7 +910,7 @@ function init(){
   document.getElementById('a-manual').addEventListener('keydown',e=>{if(e.key==='Enter'){addManual();e.preventDefault();}});
   rebuildPrematSel();
   renderAll();
-  syncFromSheets(); // 啟動時從 Sheets 同步
+  setTimeout(syncFromSheets, 2000); // 延遲 2 秒再同步，避免覆蓋本機剛進行的操作
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━ ITEM GRID ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1054,10 +1054,11 @@ async function submitRepair(){
   if(!entries.length){toast('請選擇報修項目');return;}
   const newRec={id:Date.now(),zone,floor,room,rdate,entries,status:'pending',preMats:JSON.parse(JSON.stringify(preMats))};
   records.unshift(newRec);
-  save();resetForm();renderAll();
+  save();resetForm();
   setSyncStatus('儲存中…','syncing');
   await pushRecord(newRec);
   setSyncStatus('已同步 ✓','ok');
+  renderAll(); // pushRecord 完成後才 renderAll，確保資料正確
   toast('✅ 報修紀錄已儲存');
   setTimeout(()=>setSyncStatus('',''),3000);
   goPage('list',document.querySelectorAll('.nb')[1]);
