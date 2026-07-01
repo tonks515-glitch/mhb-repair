@@ -604,6 +604,14 @@ hr{border:none;border-top:1px solid var(--bdr);margin:12px 0;}
 
       <hr/>
 
+      <!-- 報修內容 -->
+      <div class="f">
+        <label>報修內容</label>
+        <div id="ed-entries-list"></div>
+      </div>
+
+      <hr/>
+
       <!-- 預計耗材 -->
       <div class="f">
         <label>預計耗材</label>
@@ -1410,8 +1418,16 @@ function exportReport(){
   const ym=document.getElementById('rp-ym').value.split(',').map(s=>s.trim());
   const year=ym[0]||new Date().getFullYear(),month=ym[1]||(new Date().getMonth()+1);
   const ids=[...document.querySelectorAll('[data-rpid]:checked')].map(el=>+el.dataset.rpid);
-  const sel=records.filter(r=>ids.includes(r.id));
+  let sel=records.filter(r=>ids.includes(r.id));
   if(!sel.length){toast('請勾選紀錄');return;}
+  // 按樓層排序：低樓層到高樓層，同樓層內房號從小到大
+  const FLOOR_ASC=['B1','一','二','三','四','五','六','頂樓'];
+  sel=[...sel].sort((a,b)=>{
+    const fa=FLOOR_ASC.indexOf(a.floor);
+    const fb=FLOOR_ASC.indexOf(b.floor);
+    if(fa!==fb) return (fa===-1?999:fa)-(fb===-1?999:fb);
+    return roomNum(a.room)-roomNum(b.room);
+  });
 
   const S=XB.S,ds=XB.ds;
   // Cols: 序號 報修日期 報修項目 區域 樓層 位置/房號 報修內容 預計耗材項目 廠商提供數量 妙慧樓自備數量
@@ -1722,6 +1738,47 @@ async function clearAll(){
 
 // ── 編輯報修 ──────────────────────────────────────────────
 let editPreMats = [];
+let editEntries = [];
+
+function parseContent(content){
+  // 解析 content 字串：「主燈故障*1(靠走道)」
+  // → {desc:'主燈故障', qty:'*1', loc:'靠走道'}
+  const locMatch=(content||'').match(/\(([^)]+)\)$/);
+  const loc=locMatch?locMatch[1]:'';
+  const withoutLoc=loc?(content||'').slice(0,-(loc.length+2)):(content||'');
+  const qtyMatch=withoutLoc.match(/(\*[^*]+)$/);
+  const qty=qtyMatch?qtyMatch[1]:'';
+  const desc=qty?withoutLoc.slice(0,-qty.length):withoutLoc;
+  return{desc:desc.trim(), qty:qty.trim(), loc:loc.trim()};
+}
+function buildContent(desc,qty,loc){
+  return (desc||'')+( qty?( /^\*/.test(qty)?qty:'*'+qty):'')+( loc?'('+loc+')':'');
+}
+function renderEditEntries(){
+  const el=document.getElementById('ed-entries-list');
+  if(!el)return;
+  if(!editEntries.length){el.innerHTML='<div style="color:var(--t3);font-size:13px;">無報修項目</div>';return;}
+  el.innerHTML=editEntries.map(function(e,i){
+    const p=parseContent(e.content);
+    return '<div style="border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px;background:#fafafa;">'+
+      '<div style="font-weight:700;color:var(--pri);margin-bottom:8px;">'+e.item+'</div>'+
+      '<div class="f" style="margin-bottom:6px;">'+
+        '<label style="font-size:12px;color:var(--t2);">故障描述</label>'+
+        '<input class="fx-inp" type="text" value="'+p.desc+'" oninput="editEntries['+i+'].content=buildContent(this.value,editEntries['+i+']._qty||parseContent(editEntries['+i+'].content).qty,editEntries['+i+']._loc||parseContent(editEntries['+i+'].content).loc);editEntries['+i+']._desc=this.value;" placeholder="故障描述"/>'+
+      '</div>'+
+      '<div class="row2" style="margin-bottom:0;">'+
+        '<div class="f">'+
+          '<label style="font-size:12px;color:var(--t2);">數量（如 *1、*2）</label>'+
+          '<input class="fx-inp" type="text" value="'+p.qty+'" oninput="editEntries['+i+']._qty=this.value;editEntries['+i+'].content=buildContent(editEntries['+i+']._desc||parseContent(editEntries['+i+'].content).desc,this.value,editEntries['+i+']._loc||parseContent(editEntries['+i+'].content).loc);" placeholder="如 *1"/>'+
+        '</div>'+
+        '<div class="f">'+
+          '<label style="font-size:12px;color:var(--t2);">位置（如 靠走道）</label>'+
+          '<input class="fx-inp" type="text" value="'+p.loc+'" oninput="editEntries['+i+']._loc=this.value;editEntries['+i+'].content=buildContent(editEntries['+i+']._desc||parseContent(editEntries['+i+'].content).desc,editEntries['+i+']._qty||parseContent(editEntries['+i+'].content).qty,this.value);" placeholder="如 靠走道"/>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
 
 function openEdit(id){
   const r = records.find(r=>r.id===id);
@@ -1733,7 +1790,9 @@ function openEdit(id){
   document.getElementById('ed-room').value = r.room||'';
   document.getElementById('ed-rdate').value = r.rdate||'';
   editPreMats = r.preMats ? JSON.parse(JSON.stringify(r.preMats)) : [];
+  editEntries = r.entries ? JSON.parse(JSON.stringify(r.entries)) : [];
   renderEditPrematList();
+  renderEditEntries();
   document.getElementById('modal-edit').classList.add('open');
 }
 
@@ -1796,6 +1855,7 @@ async function saveEdit(){
   r.room = document.getElementById('ed-room').value.trim();
   r.rdate = document.getElementById('ed-rdate').value;
   r.preMats = JSON.parse(JSON.stringify(editPreMats));
+  if(editEntries.length) r.entries = JSON.parse(JSON.stringify(editEntries));
   save(); renderAll(); closeEditModal();
   setSyncStatus('儲存中…','syncing');
   await pushRecord(records.find(r=>r.id===id));
