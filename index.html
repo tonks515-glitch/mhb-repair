@@ -1225,7 +1225,10 @@ function buildFxEntry(e,i){
     </div>
     <div class="compose-grid">
       <select id="fxa-${i}" class="fx-sel" style="margin-bottom:0;" onchange="autoFix(${i})"><option>更換</option><option>調整</option><option>加裝</option><option>補充</option><option>清除</option><option>協助</option></select>
-      <input id="fxq-${i}" class="fx-inp" type="text" placeholder="數量 如：1個、2顆" value="${e.fixQty||''}" oninput="autoFix(${i})"/>
+      <select id="fxq-${i}" class="fx-sel" style="margin-bottom:0;" onchange="autoFix(${i})">
+        <option value="">── 數量 ──</option>
+        ${(()=>{const opts=['1個','2個','3個','4個','5個','1顆','2顆','3顆','4顆','1條','2條','1組','1片','1次'];const cur=e.fixQty||'';const inList=opts.includes(cur);return opts.map(v=>'<option value="'+v+'"'+(cur===v?' selected':'')+'>'+v+'</option>').join('')+(cur&&!inList?'<option value="'+cur+'" selected>'+cur+'</option>':'');})()}
+      </select>
     </div>
     <div style="display:flex;gap:7px;margin-bottom:7px;">
       <select id="fxitem-${i}" class="fx-sel" style="flex:1;margin-bottom:0;" onchange="autoFix(${i})">
@@ -1314,7 +1317,13 @@ function addMat(ei){
     toast('✅ 已新增「'+name+'」為固定耗材選項');
   }
   }
-  else{const def=MAT_OPTS.find(m=>m.k===k);if(!def)return;if(r.entries[ei].mats.find(m=>m.name===def.k)){toast('已加入');return;}mObj={name:def.k,lb:def.lb,src:def.src,noQty:def.noQty,hasFee:def.hasFee,defaultFee:def.defaultFee,qty:'',fee:def.defaultFee||''};}
+  else{
+    // 先找固定耗材，再找自訂耗材
+    let def=[...MAT_OPTS,...customMats].find(m=>m.k===k);
+    if(!def){def={k:k,lb:k,src:'vendor',noQty:false,hasFee:false};}
+    if(r.entries[ei].mats.find(m=>m.name===def.k)){toast('已加入');return;}
+    mObj={name:def.k,lb:def.lb,src:def.src,noQty:def.noQty||false,hasFee:def.hasFee||false,defaultFee:def.defaultFee||0,qty:'',fee:def.defaultFee||''};
+  }
   r.entries[ei].mats.push(mObj);
   document.getElementById(`fxmats-${ei}`).innerHTML=buildMatHtml(r.entries[ei].mats,ei);
   sel.value='';
