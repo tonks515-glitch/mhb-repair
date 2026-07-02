@@ -1208,11 +1208,99 @@ function openFix(id){
   document.getElementById('fx-date').value=r.fixDate||'';
   document.getElementById('fx-entries').innerHTML=r.entries.map((e,i)=>buildFxEntry(e,i)).join('');
   r.entries.forEach((e,i)=>{
-    const aEl=document.getElementById(`fxa-${i}`);if(aEl&&e.fixAct)aEl.value=e.fixAct;
-    const rEl=document.getElementById(`fxr-${i}`);if(rEl&&e.fixResult)rEl.value=e.fixResult;
+    // fxr (結果) 仍在 entry 層級
+    const rEl=document.getElementById('fxr-'+i);if(rEl&&e.fixResult)rEl.value=e.fixResult;
   });
   document.getElementById('modal-fix').classList.add('open');
 }
+
+// 建立單一維修動作列
+function buildFixActionRow(ei, ai, fa, partNames){
+  const acts=['更換','調整','加裝','補充','清除','協助'];
+  const qtys=['1個','2個','3個','4個','5個','1顆','2顆','3顆','4顆','1條','2條','1組','1片','1次'];
+  const curAct=fa.act||'更換';
+  const curQty=fa.qty||'';
+  const curItem=fa.item||'';
+  const inList=qtys.includes(curQty);
+  const qtyOpts=qtys.map(v=>'<option value="'+v+'"'+(curQty===v?' selected':'')+'>'+v+'</option>').join('')+
+    (curQty&&!inList?'<option value="'+curQty+'" selected>'+curQty+'</option>':'');
+  const itemOpts=partNames.map(p=>'<option value="'+p+'"'+(curItem===p?' selected':'')+'>'+p+'</option>').join('')+
+    '<option value="__other__"'+(curItem==='__other__'?' selected':'')+'>── 其他（自訂）──</option>';
+  const delBtn=ai>0?'<button onclick="delFixAction('+ei+','+ai+')" style="flex:none;padding:8px 10px;border:1.5px solid var(--bdr-md);border-radius:var(--rs);cursor:pointer;background:#fff;font-size:13px;color:var(--danger);" class="btn-xs btn-ghost">✕</button>':'';
+  return '<div class="fix-action-row" id="fa-row-'+ei+'-'+ai+'" style="border:1px solid var(--bdr);border-radius:var(--rs);padding:8px;margin-bottom:6px;background:#f9f9f9;">'+
+    '<div class="compose-grid" style="margin-bottom:6px;">'+
+      '<select id="fxa-'+ei+'-'+ai+'" class="fx-sel" style="margin-bottom:0;" onchange="autoFixNote('+ei+')">'+
+        acts.map(a=>'<option'+(curAct===a?' selected':'')+'>'+a+'</option>').join('')+
+      '</select>'+
+      '<select id="fxq-'+ei+'-'+ai+'" class="fx-sel" style="margin-bottom:0;" onchange="autoFixNote('+ei+')">'+
+        '<option value="">── 數量 ──</option>'+qtyOpts+
+      '</select>'+
+    '</div>'+
+    '<div style="display:flex;gap:7px;">'+
+      '<select id="fxitem-'+ei+'-'+ai+'" class="fx-sel" style="flex:1;margin-bottom:0;" onchange="autoFixNote('+ei+')">'+itemOpts+'</select>'+
+      delBtn+
+    '</div>'+
+  '</div>';
+}
+
+function delFixAction(ei,ai){
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  if(!r.entries[ei].fixActions||r.entries[ei].fixActions.length<=1){toast('至少保留一項');return;}
+  // 儲存目前所有輸入值到 fixActions
+  saveFixActionsToEntry(ei);
+  r.entries[ei].fixActions.splice(ai,1);
+  // 重新渲染此 entry 的動作列
+  renderFixActions(ei);
+  autoFixNote(ei);
+}
+
+function addFixAction(ei){
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  saveFixActionsToEntry(ei);
+  if(!r.entries[ei].fixActions) r.entries[ei].fixActions=[];
+  r.entries[ei].fixActions.push({act:'更換',qty:'',item:''});
+  renderFixActions(ei);
+}
+
+function saveFixActionsToEntry(ei){
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  const fas=r.entries[ei].fixActions||[];
+  fas.forEach(function(fa,ai){
+    const aEl=document.getElementById('fxa-'+ei+'-'+ai);
+    const qEl=document.getElementById('fxq-'+ei+'-'+ai);
+    const iEl=document.getElementById('fxitem-'+ei+'-'+ai);
+    if(aEl) fa.act=aEl.value;
+    if(qEl) fa.qty=qEl.value;
+    if(iEl) fa.item=iEl.value;
+  });
+}
+
+function renderFixActions(ei){
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  const e=r.entries[ei];
+  const partNames=getPartNames(e.item);
+  const container=document.getElementById('fix-actions-'+ei);
+  if(!container)return;
+  container.innerHTML=(e.fixActions||[]).map(function(fa,ai){
+    return buildFixActionRow(ei,ai,fa,partNames);
+  }).join('');
+}
+
+function autoFixNote(ei){
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  saveFixActionsToEntry(ei);
+  const e=r.entries[ei];
+  const date=document.getElementById('fx-date').value.trim();
+  const result=document.getElementById('fxr-'+ei);
+  const res=result?result.value:'恢復正常';
+  const parts=(e.fixActions||[]).map(function(fa){
+    return (date||'')+(fa.act||'')+(fa.qty||'')+(fa.item&&fa.item!=='__other__'?fa.item:'');
+  }).filter(Boolean);
+  const note=parts.join('及')+( res?'後，'+res:'');
+  const noteEl=document.getElementById('fxn-'+ei);
+  if(noteEl) noteEl.value=note;
+}
+
 function buildFxEntry(e,i){
   const sd=e.fixStatus==='done'?'sd':'',sdf=e.fixStatus==='deferred'?'sdf':'',spg=e.fixStatus==='inprog'?'spg':'';
   return`<div class="fxe">
@@ -1223,20 +1311,16 @@ function buildFxEntry(e,i){
       <div class="st-btn ${sdf}" id="fsdf-${i}" onclick="setFxSt(${i},'deferred')">🔜 待下次</div>
       <div class="st-btn ${spg}" id="fspg-${i}" onclick="setFxSt(${i},'inprog')">🔄 處理中</div>
     </div>
-    <div class="compose-grid">
-      <select id="fxa-${i}" class="fx-sel" style="margin-bottom:0;" onchange="autoFix(${i})"><option>更換</option><option>調整</option><option>加裝</option><option>補充</option><option>清除</option><option>協助</option></select>
-      <select id="fxq-${i}" class="fx-sel" style="margin-bottom:0;" onchange="autoFix(${i})">
-        <option value="">── 數量 ──</option>
-        ${(()=>{const opts=['1個','2個','3個','4個','5個','1顆','2顆','3顆','4顆','1條','2條','1組','1片','1次'];const cur=e.fixQty||'';const inList=opts.includes(cur);return opts.map(v=>'<option value="'+v+'"'+(cur===v?' selected':'')+'>'+v+'</option>').join('')+(cur&&!inList?'<option value="'+cur+'" selected>'+cur+'</option>':'');})()}
-      </select>
+    <div id="fix-actions-${i}">
+      ${(()=>{
+        // 向後相容：如果沒有 fixActions，從舊欄位建立
+        if(!e.fixActions||!e.fixActions.length){
+          e.fixActions=[{act:e.fixAct||'更換',qty:e.fixQty||'',item:e.fixItem||e.item}];
+        }
+        return e.fixActions.map((fa,ai)=>buildFixActionRow(i,ai,fa,getPartNames(e.item))).join('');
+      })()}
     </div>
-    <div style="display:flex;gap:7px;margin-bottom:7px;">
-      <select id="fxitem-${i}" class="fx-sel" style="flex:1;margin-bottom:0;" onchange="autoFix(${i})">
-        ${getPartNames(e.item).map(p=>'<option value="'+p+'"'+(( e.fixItem||e.item)===p?' selected':'')+'>'+p+'</option>').join('')}
-        <option value="__other__">── 其他（自訂）──</option>
-      </select>
-      <button class="btn-xs btn-ghost" onclick="addPartNamePrompt('${esc(e.item)}',${i})" style="flex:none;padding:8px 10px;white-space:nowrap;border:1.5px solid var(--bdr-md);border-radius:var(--rs);cursor:pointer;background:#fff;font-size:13px;">＋</button>
-    </div>
+    <button onclick="addFixAction(${i})" style="width:100%;margin-bottom:7px;padding:8px;border:1.5px dashed var(--bdr-md);border-radius:var(--rs);background:#fff;cursor:pointer;font-size:13px;color:var(--t2);">＋ 新增維修動作</button>
     <select id="fxr-${i}" class="fx-sel" onchange="autoFix(${i})">
       <option>恢復正常</option><option>現場測試可正常使用</option><option>現場測試沒有異音</option>
       <option>列下次處理</option><option>有鳥蛋，列下個月施作</option><option>尚未到貨</option><option>已自行更換</option>
@@ -1335,11 +1419,16 @@ async function saveFix(){
   const r=records.find(r=>r.id===fixId);if(!r)return;
   r.fixDate=document.getElementById('fx-date').value;
   r.entries.forEach((e,i)=>{
-    e.fixAct=document.getElementById(`fxa-${i}`).value;
-    e.fixQty=document.getElementById(`fxq-${i}`).value;
-    e.fixItem=document.getElementById(`fxitem-${i}`).value;
-    e.fixResult=document.getElementById(`fxr-${i}`).value;
-    e.fixNote=document.getElementById(`fxn-${i}`).value;
+    // 儲存多組維修動作
+    saveFixActionsToEntry(i);
+    // 向後相容：把第一筆動作寫回舊欄位
+    if(e.fixActions&&e.fixActions.length){
+      e.fixAct=e.fixActions[0].act||'更換';
+      e.fixQty=e.fixActions[0].qty||'';
+      e.fixItem=e.fixActions[0].item||e.item;
+    }
+    e.fixResult=document.getElementById('fxr-'+i)?document.getElementById('fxr-'+i).value:'';
+    e.fixNote=document.getElementById('fxn-'+i)?document.getElementById('fxn-'+i).value:'';
     // mats already updated via oninput → updMat()
   });
   const sts=r.entries.map(e=>e.fixStatus||'pending');
