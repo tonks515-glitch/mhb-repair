@@ -1333,10 +1333,11 @@ function autoFixNote(ei){
   const date=document.getElementById('fx-date').value.trim();
   const result=document.getElementById('fxr-'+ei);
   const res=result?result.value:'恢復正常';
+  // 日期只出現一次，後面每個動作只有「動作+數量+項目」
   const parts=(e.fixActions||[]).map(function(fa){
-    return (date||'')+(fa.act||'')+(fa.qty||'')+(fa.item&&fa.item!=='__other__'?fa.item:'');
+    return (fa.act||'')+(fa.qty||'')+(fa.item&&fa.item!=='__other__'?fa.item:'');
   }).filter(Boolean);
-  const note=parts.join('及')+( res?'後，'+res:'');
+  const note=(date?date:'')+(parts.length?parts.join('及'):'')+(res?'後，'+res:'');
   const noteEl=document.getElementById('fxn-'+ei);
   if(noteEl) noteEl.value=note;
 }
