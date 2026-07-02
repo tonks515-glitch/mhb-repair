@@ -1237,10 +1237,49 @@ function buildFixActionRow(ei, ai, fa, partNames){
       '</select>'+
     '</div>'+
     '<div style="display:flex;gap:7px;">'+
-      '<select id="fxitem-'+ei+'-'+ai+'" class="fx-sel" style="flex:1;margin-bottom:0;" onchange="autoFixNote('+ei+')">'+itemOpts+'</select>'+
+      '<select id="fxitem-'+ei+'-'+ai+'" class="fx-sel" style="flex:1;margin-bottom:0;" onchange="onFixItemChange('+ei+','+ai+')">'+itemOpts+'</select>'+
+      '<button class="btn-xs btn-ghost" onclick="addPartNameForAction(\'' + ei + '\',\'' + ai + '\')" style="flex:none;padding:8px 10px;border:1.5px solid var(--bdr-md);border-radius:var(--rs);cursor:pointer;background:#fff;font-size:13px;">＋</button>'+
       delBtn+
     '</div>'+
   '</div>';
+}
+
+function onFixItemChange(ei,ai){
+  const sel=document.getElementById('fxitem-'+ei+'-'+ai);
+  if(!sel)return;
+  if(sel.value==='__other__'){
+    const r=records.find(r=>r.id===fixId);if(!r)return;
+    const e=r.entries[ei];
+    const name=prompt('輸入自訂維修項目名稱：','');
+    if(!name||!name.trim()){sel.value='';autoFixNote(ei);return;}
+    const t=name.trim();
+    addCustomPartName(e.item,t);
+    // 重建選單並選中
+    const partNames=getPartNames(e.item);
+    sel.innerHTML=partNames.map(p=>'<option value="'+p+'"'+(t===p?' selected':'')+'>'+p+'</option>').join('')+
+      '<option value="__other__">── 其他（自訂）──</option>';
+    sel.value=t;
+    toast('✅ 已新增「'+t+'」');
+  }
+  autoFixNote(ei);
+}
+
+function addPartNameForAction(ei,ai){
+  const itemEl=document.getElementById('fxitem-'+ei+'-'+ai);
+  if(!itemEl)return;
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  const e=r.entries[ei];
+  const name=prompt('新增維修項目名稱（將永久保存）：','');
+  if(!name||!name.trim())return;
+  const t=name.trim();
+  addCustomPartName(e.item,t);
+  // 重建此選單
+  const partNames=getPartNames(e.item);
+  itemEl.innerHTML=partNames.map(p=>'<option value="'+p+'"'+(t===p?' selected':'')+'>'+p+'</option>').join('')+
+    '<option value="__other__">── 其他（自訂）──</option>';
+  itemEl.value=t;
+  autoFixNote(ei);
+  toast('✅ 已新增「'+t+'」');
 }
 
 function delFixAction(ei,ai){
@@ -1258,7 +1297,8 @@ function addFixAction(ei){
   const r=records.find(r=>r.id===fixId);if(!r)return;
   saveFixActionsToEntry(ei);
   if(!r.entries[ei].fixActions) r.entries[ei].fixActions=[];
-  r.entries[ei].fixActions.push({act:'更換',qty:'',item:''});
+  const firstItem=r.entries[ei].fixActions.length>0?r.entries[ei].fixActions[0].item:'';
+  r.entries[ei].fixActions.push({act:'更換',qty:'',item:firstItem});
   renderFixActions(ei);
 }
 
