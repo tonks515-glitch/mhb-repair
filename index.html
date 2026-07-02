@@ -1217,28 +1217,27 @@ function openFix(id){
 // 建立單一維修動作列
 function buildFixActionRow(ei, ai, fa, partNames){
   const acts=['更換','調整','加裝','補充','清除','協助'];
-  const qtys=['1個','2個','3個','4個','5個','1顆','2顆','3顆','4顆','1條','2條','1組','1片','1次'];
   const curAct=fa.act||'更換';
   const curQty=fa.qty||'';
   const curItem=fa.item||'';
-  const inList=qtys.includes(curQty);
-  const qtyOpts=qtys.map(v=>'<option value="'+v+'"'+(curQty===v?' selected':'')+'>'+v+'</option>').join('')+
-    (curQty&&!inList?'<option value="'+curQty+'" selected>'+curQty+'</option>':'');
-  const itemOpts=partNames.map(p=>'<option value="'+p+'"'+(curItem===p?' selected':'')+'>'+p+'</option>').join('')+
+  const actHidden=ai>0&&fa._showAct!==true;
+  const itemOpts=partNames.map(function(p){return '<option value="'+p+'"'+(curItem===p?' selected':'')+'>'+p+'</option>';}).join('')+
     '<option value="__other__"'+(curItem==='__other__'?' selected':'')+'>── 其他（自訂）──</option>';
   const delBtn=ai>0?'<button onclick="delFixAction('+ei+','+ai+')" style="flex:none;padding:8px 10px;border:1.5px solid var(--bdr-md);border-radius:var(--rs);cursor:pointer;background:#fff;font-size:13px;color:var(--danger);" class="btn-xs btn-ghost">✕</button>':'';
+  const toggleBtn=ai>0?'<button id="fa-toggle-'+ei+'-'+ai+'" onclick="toggleFixAct('+ei+','+ai+')" style="font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;padding:2px 4px;text-decoration:underline;">'+(actHidden?'切換動作':'隱藏動作')+'</button>':'';
   return '<div class="fix-action-row" id="fa-row-'+ei+'-'+ai+'" style="border:1px solid var(--bdr);border-radius:var(--rs);padding:8px;margin-bottom:6px;background:#f9f9f9;">'+
-    '<div class="compose-grid" style="margin-bottom:6px;">'+
+    '<div id="fa-act-area-'+ei+'-'+ai+'" style="'+(actHidden?'display:none;':'')+'margin-bottom:6px;">'+
       '<select id="fxa-'+ei+'-'+ai+'" class="fx-sel" style="margin-bottom:0;" onchange="autoFixNote('+ei+')">'+
-        acts.map(a=>'<option'+(curAct===a?' selected':'')+'>'+a+'</option>').join('')+
+        acts.map(function(a){return '<option'+(curAct===a?' selected':'')+'>'+a+'</option>';}).join('')+
       '</select>'+
-      '<select id="fxq-'+ei+'-'+ai+'" class="fx-sel" style="margin-bottom:0;" onchange="autoFixNote('+ei+')">'+
-        '<option value="">── 數量 ──</option>'+qtyOpts+
-      '</select>'+
+    '</div>'+
+    (ai>0?'<div style="margin-bottom:4px;">'+toggleBtn+'</div>':'')+
+    '<div style="margin-bottom:6px;">'+
+      '<input id="fxq-'+ei+'-'+ai+'" class="fx-inp" type="text" placeholder="數量（如 1個、150公分）" value="'+curQty+'" oninput="autoFixNote('+ei+')" style="font-size:16px;width:100%;box-sizing:border-box;"/>'+
     '</div>'+
     '<div style="display:flex;gap:7px;">'+
       '<select id="fxitem-'+ei+'-'+ai+'" class="fx-sel" style="flex:1;margin-bottom:0;" onchange="onFixItemChange('+ei+','+ai+')">'+itemOpts+'</select>'+
-      '<button class="btn-xs btn-ghost" onclick="addPartNameForAction(\'' + ei + '\',\'' + ai + '\')" style="flex:none;padding:8px 10px;border:1.5px solid var(--bdr-md);border-radius:var(--rs);cursor:pointer;background:#fff;font-size:13px;">＋</button>'+
+      '<button class="btn-xs btn-ghost" data-ei="'+ei+'" data-ai="'+ai+'" onclick="addPartNameForAction(this.dataset.ei,this.dataset.ai)" style="flex:none;padding:8px 10px;border:1.5px solid var(--bdr-md);border-radius:var(--rs);cursor:pointer;background:#fff;font-size:13px;">＋</button>'+
       delBtn+
     '</div>'+
   '</div>';
@@ -1280,6 +1279,16 @@ function addPartNameForAction(ei,ai){
   itemEl.value=t;
   autoFixNote(ei);
   toast('✅ 已新增「'+t+'」');
+}
+
+function toggleFixAct(ei,ai){
+  const r=records.find(r=>r.id===fixId);if(!r)return;
+  const fa=r.entries[ei].fixActions[ai];
+  fa._showAct=!fa._showAct;
+  const area=document.getElementById('fa-act-area-'+ei+'-'+ai);
+  const btn=document.getElementById('fa-toggle-'+ei+'-'+ai);
+  if(area) area.style.display=fa._showAct?'':'none';
+  if(btn) btn.textContent=fa._showAct?'隱藏動作':'切換動作';
 }
 
 function delFixAction(ei,ai){
