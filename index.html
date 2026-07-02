@@ -1205,7 +1205,9 @@ function openFix(id){
   const r=records.find(r=>r.id===id);if(!r)return;
   fixId=id;
   document.getElementById('fx-loc').textContent=`${r.floor}F ${r.room}（${r.zone}）`;
-  document.getElementById('fx-date').value=r.fixDate||'';
+  // 預設今天日期（M/D格式），若已有記錄則用記錄值
+  const _today=(function(){const d=new Date();return (d.getMonth()+1)+'/'+(d.getDate());})();
+  document.getElementById('fx-date').value=r.fixDate||_today;
   document.getElementById('fx-entries').innerHTML=r.entries.map((e,i)=>buildFxEntry(e,i)).join('');
   r.entries.forEach((e,i)=>{
     // fxr (結果) 仍在 entry 層級
@@ -1431,7 +1433,7 @@ function autoFix(i){
   const result=document.getElementById('fxr-'+i).value;
   document.getElementById('fxn-'+i).value=(date||'')+act+(qty||'')+(item||'')+'後，'+result;
 }
-function autoFixAll(){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries.forEach((_,i)=>autoFix(i));}
+function autoFixAll(){const r=records.find(r=>r.id===fixId);if(!r)return;r.entries.forEach(function(_,i){autoFixNote(i);});}
 function addPartNamePrompt(item,i){
   const name=prompt('新增維修項目名稱（將永久保存）：','');
   if(!name||!name.trim())return;
