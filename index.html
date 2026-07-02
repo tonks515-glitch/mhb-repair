@@ -1333,11 +1333,26 @@ function autoFixNote(ei){
   const date=document.getElementById('fx-date').value.trim();
   const result=document.getElementById('fxr-'+ei);
   const res=result?result.value:'恢復正常';
-  // 日期只出現一次，後面每個動作只有「動作+數量+項目」
-  const parts=(e.fixActions||[]).map(function(fa){
-    return (fa.act||'')+(fa.qty||'')+(fa.item&&fa.item!=='__other__'?fa.item:'');
-  }).filter(Boolean);
-  const note=(date?date:'')+(parts.length?parts.join('及'):'')+(res?'後，'+res:'');
+  const fas=(e.fixActions||[]);
+  let body='';
+  if(fas.length){
+    const acts=fas.map(function(fa){return fa.act||'更換';});
+    const allSame=acts.every(function(a){return a===acts[0];});
+    if(allSame){
+      // 動作相同：只寫一次動作，後面每筆只有數量+項目
+      const itemParts=fas.map(function(fa){
+        return (fa.qty||'')+(fa.item&&fa.item!=='__other__'?fa.item:'');
+      }).filter(Boolean);
+      body=(acts[0]||'')+itemParts.join('及');
+    }else{
+      // 動作不同：每筆各自有動作
+      const parts=fas.map(function(fa){
+        return (fa.act||'')+(fa.qty||'')+(fa.item&&fa.item!=='__other__'?fa.item:'');
+      }).filter(Boolean);
+      body=parts.join('及');
+    }
+  }
+  const note=(date||'')+body+(res?'後，'+res:'');
   const noteEl=document.getElementById('fxn-'+ei);
   if(noteEl) noteEl.value=note;
 }
