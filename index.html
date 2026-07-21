@@ -754,6 +754,7 @@ let customMats=JSON.parse(localStorage.getItem('mhb7_cm')||'[]');
 let customPartNames=JSON.parse(localStorage.getItem('mhb7_cpn')||'{}');
 let customChips=JSON.parse(localStorage.getItem('mhb7_cc')||'{}');
 let customItems=JSON.parse(localStorage.getItem('mhb7_ci')||'[]'); // 手動新增的報修項目（永久保存）
+let deletedMats=JSON.parse(localStorage.getItem('mhb7_dm')||'[]'); // 已刪除的耗材key清單
 let _syncing=false;
 let cState={};
 let preMats=[];  // [{name,lb,src,qty,noQty,hasFee,fee}]
@@ -833,6 +834,7 @@ async function syncFromSheets(){
       if(customs.customChips){customChips=customs.customChips;localStorage.setItem('mhb7_cc',JSON.stringify(customChips));}
       if(customs.purchases){purchases=customs.purchases;localStorage.setItem('mhb7_p',JSON.stringify(purchases));}
       if(customs.customItems){customItems=customs.customItems;localStorage.setItem('mhb7_ci',JSON.stringify(customItems));buildItemGrid(ITEMS);}
+      if(customs.deletedMats){deletedMats=customs.deletedMats;localStorage.setItem('mhb7_dm',JSON.stringify(deletedMats));}
       if(customs.reportYm){
         localStorage.setItem('mhb7_ym',customs.reportYm);
         const ymEl=document.getElementById('rp-ym');
@@ -892,6 +894,18 @@ function saveCustomMats(){localStorage.setItem('mhb7_cm',JSON.stringify(customMa
 function saveCustomPartNames(){localStorage.setItem('mhb7_cpn',JSON.stringify(customPartNames));pushCustom('customPartNames',customPartNames);}
 function saveCustomChips(){localStorage.setItem('mhb7_cc',JSON.stringify(customChips));pushCustom('customChips',customChips);}
 function saveCustomItems(){localStorage.setItem('mhb7_ci',JSON.stringify(customItems));pushCustom('customItems',customItems);}
+function saveDeletedMats(){localStorage.setItem('mhb7_dm',JSON.stringify(deletedMats));pushCustom('deletedMats',deletedMats);}
+function getActiveMats(){
+  // 合併 MAT_OPTS + customMats，過濾掉已刪除的
+  return [...MAT_OPTS,...customMats].filter(m=>!deletedMats.includes(m.k));
+}
+function deleteMat(k){
+  if(!confirm('確定永久刪除此耗材項目？')) return;
+  if(!deletedMats.includes(k)) deletedMats.push(k);
+  saveDeletedMats();
+  rebuildPrematSel();
+  toast('已刪除耗材項目');
+}
 function getChips(item){return[...(CMAP[item]||[item+'故障']),...(customChips[item]||[])];}
 function addCustomChip(item){
   const name=prompt('新增報修內容選項（將永久保存）：','');
@@ -917,22 +931,43 @@ function addCustomPartName(item,name){
 function rebuildPrematSel(){
   const sel=document.getElementById('premat-sel');
   if(!sel)return;
-  // Remove existing custom optgroup if present
-  const existing=sel.querySelector('optgroup[label="我的自訂耗材"]');
-  if(existing)existing.remove();
-  if(!customMats.length)return;
-  const grp=document.createElement('optgroup');
-  grp.label='我的自訂耗材';
-  customMats.forEach(m=>{
-    const opt=document.createElement('option');
-    opt.value=`${m.k}|${m.src}`;
-    opt.textContent=m.lb+(m.src==='self'?'（自備）':m.src==='resident'?'（住眾自費）':'');
-    grp.appendChild(opt);
+  const active=getActiveMats();
+  const SRC_GROUPS={'self':'妙慧樓自備','vendor':'廠商提供','resident':'廠商代購，住眾自費'};
+  // Build optgroups by src
+  const grouped={'self':[],'vendor':[],'resident':[]};
+  active.forEach(m=>{ if(grouped[m.src]) grouped[m.src].push(m); });
+  sel.innerHTML='<option value="">── 選擇耗材 ──</option>';
+  ['self','vendor','resident'].forEach(src=>{
+    if(!grouped[src].length) return;
+    const grp=document.createElement('optgroup');
+    grp.label=SRC_GROUPS[src];
+    grouped[src].forEach(m=>{
+      const opt=document.createElement('option');
+      opt.value=m.k+'|'+m.src+(m.noQty?'|noqty':'')+(m.hasFee?'|fee:'+(m.defaultFee||0):'');
+      opt.textContent=m.lb;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
   });
-  // Insert before the custom input option (last option)
-  const lastOpt=sel.querySelector('option[value^="__custom__"]');
-  if(lastOpt)sel.insertBefore(grp,lastOpt);
-  else sel.appendChild(grp);
+  // 手動輸入選項
+  const customOpt=document.createElement('option');
+  customOpt.value='__custom__|vendor';
+  customOpt.textContent='＋ 其他（手動輸入）';
+  sel.appendChild(customOpt);
+  // 同步更新刪除清單到旁邊的管理列表
+  renderMatDeleteList();
+}
+function renderMatDeleteList(){
+  const el=document.getElementById('mat-delete-list');
+  if(!el)return;
+  const active=getActiveMats();
+  el.innerHTML=active.map(function(m){
+    return '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--bdr);">'+
+      '<span style="flex:1;font-size:13px;">'+m.lb+'</span>'+
+      '<span style="font-size:11px;color:var(--t3);flex-shrink:0;">'+(m.src==='self'?'自備':m.src==='resident'?'住眾自費':'廠商')+'</span>'+
+      '<button data-matk="'+m.k.replace(/"/g,'&quot;')+'" onclick="deleteMat(this.dataset.matk)" style="flex-shrink:0;border:none;background:none;color:var(--danger);cursor:pointer;font-size:16px;padding:2px 6px;">×</button>'+
+    '</div>';
+  }).join('');
 }
 function today(){return new Date().toISOString().split('T')[0];}
 
