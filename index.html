@@ -707,24 +707,36 @@ const PART_NAMES={
 };
 // src: self=妙慧樓自備, vendor=廠商提供, resident=廠商代購住眾自費
 const MAT_OPTS=[
+  // 妙慧樓自備
   {k:'和成HCG馬桶水箱落水器',lb:'和成 HCG 馬桶水箱落水器',src:'self',noQty:false,hasFee:false},
   {k:'浴室崁燈15W自然光4000k',lb:'浴室崁燈 15W 自然光 4000k',src:'self',noQty:false,hasFee:false},
   {k:'走道燈15W暖白光3000k',lb:'走道燈 15W 暖白光 3000k',src:'self',noQty:false,hasFee:false},
   {k:'防鳥刺',lb:'防鳥刺',src:'self',noQty:true,hasFee:false},
+  // 廠商提供
   {k:'12W暖黃光燈泡',lb:'12W 暖黃光燈泡',src:'vendor',noQty:false,hasFee:false},
   {k:'10W暖黃光燈泡',lb:'10W 暖黃光燈泡',src:'vendor',noQty:false,hasFee:false},
   {k:'5W崁燈',lb:'5W 崁燈',src:'vendor',noQty:false,hasFee:false},
   {k:'三段式開關',lb:'三段式開關',src:'vendor',noQty:false,hasFee:false},
   {k:'小夜燈',lb:'小夜燈',src:'vendor',noQty:false,hasFee:false},
-  {k:'冷氣遙控器',lb:'冷氣遙控器',src:'vendor',noQty:false,hasFee:false},
-  {k:'落水器',lb:'落水器（馬桶）',src:'vendor',noQty:false,hasFee:false},
+  {k:'房間冷氣遙控器型號-日立RE10T1',lb:'房間冷氣遙控器型號-日立RE10T1',src:'vendor',noQty:false,hasFee:false},
   {k:'浮球開關',lb:'浮球開關',src:'vendor',noQty:false,hasFee:false},
   {k:'排水管',lb:'排水管',src:'vendor',noQty:false,hasFee:false},
   {k:'風鼓的軸承',lb:'風鼓的軸承',src:'vendor',noQty:false,hasFee:false},
   {k:'肥皂架',lb:'肥皂架',src:'vendor',noQty:false,hasFee:false},
+  {k:'水門',lb:'水門',src:'vendor',noQty:false,hasFee:false},
+  {k:'浴室水龍頭',lb:'浴室水龍頭',src:'vendor',noQty:false,hasFee:false},
+  {k:'補冷媒',lb:'補冷媒',src:'vendor',noQty:true,hasFee:false},
+  {k:'清洗冷氣室內外機',lb:'清洗冷氣室內外機',src:'vendor',noQty:true,hasFee:false},
+  {k:'蓮蓬頭的水管150公分',lb:'蓮蓬頭的水管(150公分)',src:'vendor',noQty:false,hasFee:false},
+  {k:'洗手台下面管線的凡爾',lb:'洗手台下面管線的凡爾',src:'vendor',noQty:false,hasFee:false},
+  {k:'冷氣左右風扇導風板',lb:'冷氣左右風扇（導風板）',src:'vendor',noQty:false,hasFee:false},
+  {k:'蓮蓬頭墊圈',lb:'蓮蓬頭墊圈',src:'vendor',noQty:false,hasFee:false},
+  {k:'洗手台的落水頭',lb:'洗手台的落水頭',src:'vendor',noQty:false,hasFee:false},
+  {k:'凡爾',lb:'凡爾',src:'vendor',noQty:false,hasFee:false},
+  {k:'LED日光燈',lb:'LED日光燈-LED4243R7-20W 4FT T8 4000K-Natural White',src:'vendor',noQty:false,hasFee:false},
+  // 廠商代購，住眾自費
   {k:'馬桶水箱蓋',lb:'馬桶水箱蓋（廠商代購，住眾自費）',src:'resident',noQty:false,hasFee:true,defaultFee:600},
   {k:'蓮蓬頭的水管',lb:'蓮蓬頭的水管（廠商代購，住眾自費）',src:'resident',noQty:false,hasFee:true,defaultFee:150},
-  {k:'水門',lb:'水門',src:'vendor',noQty:false,hasFee:false},
 ];
 const SRC_LB={self:'妙慧樓自備',vendor:'廠商提供',resident:'住眾自費'};
 const SRC_CLS={self:'mss',vendor:'msv',resident:'msr'};
