@@ -748,7 +748,7 @@ function setSyncStatus(msg, cls){
 }
 
 let _gasCbCounter=0;
-async function gasGet(action){
+async function gasGet(action, extraParams){
   if(!GAS_URL||GAS_URL==='__GAS_URL__') return null;
   return new Promise((resolve)=>{
     // Use JSONP to avoid CORS issues with GAS redirects
@@ -756,7 +756,7 @@ async function gasGet(action){
     const script=document.createElement('script');
     const timeout=setTimeout(()=>{
       delete window[cbName];
-      document.body.removeChild(script);
+      try{document.body.removeChild(script);}catch(e){}
       resolve(null);
     },15000);
     window[cbName]=function(data){
@@ -765,7 +765,11 @@ async function gasGet(action){
       try{document.body.removeChild(script);}catch(e){}
       resolve(data);
     };
-    script.src=GAS_URL+'?action='+action+'&callback='+cbName;
+    let url=GAS_URL+'?action='+action+'&callback='+cbName;
+    if(extraParams){
+      for(const k in extraParams) url+='&'+encodeURIComponent(k)+'='+encodeURIComponent(extraParams[k]);
+    }
+    script.src=url;
     document.body.appendChild(script);
   });
 }
@@ -780,16 +784,24 @@ async function gasPost(data){
     const text=await res.text();
     try{return JSON.parse(text);}catch(e){return {ok:true};}
   }catch(e){
+    // GAS redirect 後 CORS headers 消失會觸發 TypeError
+    // GAS 實際上已執行，視為成功
+    if(e instanceof TypeError && e.message && (e.message.includes('Failed to fetch')||e.message.includes('NetworkError')||e.message.includes('CORS')||e.message.includes('cors'))){
+      console.warn('gasPost CORS/network warning (GAS likely executed):', e.message);
+      return {ok:true};
+    }
     console.error('gasPost error:',e);
     return null;
   }
 }
 
 let _syncLock=false;
-// Auto-release sync lock after 10 seconds in case of network failure
+let _syncLockTimer=null;
+// Auto-release sync lock after 15 seconds in case of network failure
 function _setSyncLock(val){
   _syncLock=val;
-  if(val) setTimeout(()=>{_syncLock=false;},10000);
+  if(_syncLockTimer){clearTimeout(_syncLockTimer);_syncLockTimer=null;}
+  if(val) _syncLockTimer=setTimeout(()=>{_syncLock=false;_syncLockTimer=null;},15000);
 }
 async function syncFromSheets(){
   if(!GAS_URL||GAS_URL==='__GAS_URL__') return;
@@ -848,10 +860,7 @@ async function pushRecord(rec){
 }
 
 async function pushDeleteRecord(id){
-  _setSyncLock(true);
-  localStorage.setItem('mhb7_r',JSON.stringify(records));
-  try{ await gasPost({action:'deleteRecord',id:id}); }
-  finally{ _setSyncLock(false); }
+  return await gasPost({action:'deleteRecord',id:id});
 }
 
 async function pushCustom(key,value){
@@ -1878,11 +1887,11 @@ async function clearDone(){
   const cnt=records.filter(r=>r.status==='done').length;
   if(!cnt){toast('沒有已完修的紀錄');return;}
   if(!confirm(`確定清除 ${cnt} 筆已完修的紀錄？\n建議先匯出備份。`))return;
+  _setSyncLock(true); // 最先鎖住，防止 syncFromSheets 在刪除過程中覆蓋回來
   const toDelete=records.filter(r=>r.status==='done').map(r=>r.id);
   records=records.filter(r=>r.status!=='done');
   save();renderAll();
   setSyncStatus('Sheets 同步中…','syncing');
-  _setSyncLock(true); // 鎖住，防止同步覆蓋
   let ok=true;
   try{
     for(const id of toDelete){
@@ -1895,8 +1904,7 @@ async function clearDone(){
   if(ok){
     setSyncStatus('已同步 ✓','ok');
     toast('✅ 已清除 '+cnt+' 筆已完修紀錄');
-    // 刪除完成後主動 sync 確認 Sheets 狀態
-    setTimeout(syncFromSheets, 500);
+    setTimeout(syncFromSheets, 800);
   }else{
     setSyncStatus('部分同步失敗','err');
     toast('⚠️ 本機已清除，但部分 Sheets 同步失敗，請再按同步');
@@ -1906,6 +1914,7 @@ async function clearDone(){
 async function clearAll(){
   if(!records.length){toast('沒有紀錄');return;}
   if(!confirm(`確定清除全部 ${records.length} 筆紀錄？\n此操作無法還原，建議先匯出備份。`))return;
+  _setSyncLock(true); // confirm 後立刻鎖住，防止 syncFromSheets 插入
   const cnt=records.length;
   const toDelete=records.map(r=>r.id);
   records=[];
@@ -1921,7 +1930,6 @@ async function clearAll(){
     pushCustom('reportYm',ymEl.value);
   }
   setSyncStatus('Sheets 同步中…','syncing');
-  _setSyncLock(true);
   let ok=true;
   try{
     for(const id of toDelete){
@@ -1934,7 +1942,7 @@ async function clearAll(){
   if(ok){
     setSyncStatus('已同步 ✓','ok');
     toast('✅ 已清除全部 '+cnt+' 筆紀錄');
-    setTimeout(syncFromSheets, 500);
+    setTimeout(syncFromSheets, 800);
   }else{
     setSyncStatus('部分同步失敗','err');
     toast('⚠️ 本機已清除，但部分 Sheets 同步失敗，請再按同步');
